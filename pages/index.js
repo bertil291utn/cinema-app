@@ -3,13 +3,42 @@ import Image from 'next/image';
 
 export default function Home() {
   const cities = ['Tumbaco', 'Los Chillos', 'Cayambe', 'El Coca'];
-  const posters = [
-    'https://www.cineplex.com.ec/customers/fotos/poster_coda.jpg',
-    'https://www.cineplex.com.ec/customers/fotos/poster_huevitos.jpg',
-    'https://www.cineplex.com.ec/customers/fotos/poster_lacasaoscura2.jpg',
-    'https://www.cineplex.com.ec/customers/fotos/poster_007.jpg',
-    'https://www.cineplex.com.ec/customers/fotos/poster_venom3.jpg',
+  let movies = [
+    {
+      id: 1,
+      name: 'Coda',
+      poster: 'https://www.cineplex.com.ec/customers/fotos/poster_coda.jpg',
+      new: false,
+    },
+    {
+      id: 2,
+      name: 'Huevitos',
+      poster: 'https://www.cineplex.com.ec/customers/fotos/poster_huevitos.jpg',
+      new: false,
+    },
+    {
+      id: 3,
+      name: 'Casa oscura',
+      poster:
+        'https://www.cineplex.com.ec/customers/fotos/poster_lacasaoscura2.jpg',
+      new: false,
+    },
+    {
+      id: 4,
+      name: 'James Bond 007',
+      poster: 'https://www.cineplex.com.ec/customers/fotos/poster_007.jpg',
+      new: true,
+    },
+    {
+      id: 4,
+      name: 'Venom',
+      poster: 'https://www.cineplex.com.ec/customers/fotos/poster_venom3.jpg',
+      new: true,
+    },
+    ,
   ];
+  //sort by new estrenos
+  movies = movies.sort((x, y) => (x.new === y.new ? 0 : x.new ? -1 : 1));
   return (
     <div>
       <Head>
@@ -30,17 +59,19 @@ export default function Home() {
           ))}
         </div>
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
-          {posters.map((poster, i) => (
-            <Image
-              src={poster}
-              key={`poster-${i}`}
-              alt={`poster-${i}`}
-              height={300}
-              width={150}
-              objectFit='cover'
-              className='my-image rounded-lg'
-            />
-          ))}
+          {movies.map((movie, i) => {
+            return (
+              <Image
+                src={movie.poster}
+                key={`poster-${i}`}
+                alt={`poster-${i}`}
+                height={300}
+                width={150}
+                objectFit='cover'
+                className='my-image rounded-lg'
+              />
+            );
+          })}
         </div>
       </main>
     </div>
