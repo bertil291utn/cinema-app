@@ -8,7 +8,7 @@ export default function Home() {
       id: 1,
       name: 'Coda',
       poster: 'https://www.cineplex.com.ec/customers/fotos/poster_coda.jpg',
-      new: false,
+      new: true,
     },
     {
       id: 2,
@@ -59,19 +59,23 @@ export default function Home() {
           ))}
         </div>
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
-          {movies.map((movie, i) => {
-            return (
+          {movies.map((movie, i) => (
+            <div key={`poster-${i}`} className='relative'>
               <Image
                 src={movie.poster}
-                key={`poster-${i}`}
                 alt={`poster-${i}`}
                 height={300}
                 width={150}
                 objectFit='cover'
                 className='my-image rounded-lg'
               />
-            );
-          })}
+              {movie.new && (
+                <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
+                  Estreno
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </main>
     </div>
