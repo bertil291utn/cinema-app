@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 export default function Home() {
   const [_movies, setMovies] = useState(sortMovies(movies, 'new'));
+  const [_cities, setCities] = useState(cities);
 
   const selectByCity = (cityId) => () => {
     setMovies(
@@ -12,6 +13,13 @@ export default function Home() {
         'new'
       )
     );
+
+    _cities.forEach(c=>{
+      c.active=false;
+    })
+    setCities(_cities);
+    _cities[_cities.findIndex((c) => c.id == cityId)].active = true;
+    setCities(_cities);
   };
 
   //sort by new estrenos
@@ -25,11 +33,13 @@ export default function Home() {
 
       <main className='container px-3 py-5'>
         <div className='text-center'>
-          {cities.map((city, i) => (
+          {_cities.map((city, i) => (
             <button
               key={`btn-city-${i}`}
               onClick={selectByCity(city.id)}
-              className='rounded-full border border-black px-3 py-1 mr-3 mb-3 focus:bg-black focus:text-white'
+              className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 ${
+                city.active ? 'bg-black text-white' : ''
+              }`}
             >
               {city.name}
             </button>
@@ -59,10 +69,10 @@ export default function Home() {
 }
 
 export const cities = [
-  { id: 1, name: 'Tumbaco' },
-  { id: 2, name: 'Los Chillos' },
-  { id: 3, name: 'Cayambe' },
-  { id: 4, name: 'El Coca' },
+  { id: 1, name: 'Tumbaco', active: true },
+  { id: 2, name: 'Los Chillos', active: false },
+  { id: 3, name: 'Cayambe', active: false },
+  { id: 4, name: 'El Coca', active: false },
 ];
 export let movies = [
   {
