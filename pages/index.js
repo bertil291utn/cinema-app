@@ -60,14 +60,16 @@ export default function Home() {
         </div>
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
           {movies.map((movie, i) => (
-            <div key={`poster-${i}`} className='relative'>
+            <div
+              key={`poster-${i}`}
+              className="h-96 w-full relative "
+            >
               <Image
                 src={movie.poster}
                 alt={`poster-${i}`}
-                height={300}
-                width={150}
-                objectFit='cover'
-                className='my-image rounded-lg'
+                layout="fill"
+                objectFit="cover" 
+                className="rounded-lg"
               />
               {movie.new && (
                 <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
