@@ -2,27 +2,11 @@ import { IoFastFoodOutline } from 'react-icons/io5';
 import { IoFastFoodSharp } from 'react-icons/io5';
 
 export default function Footer() {
-  const menuIcons = [
-    {
-      id: 1,
-      iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-      name: 'Snacks',
-    },
-    {
-      id: 2,
-      iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-      name: 'Snacks',
-    },
-    {
-      id: 3,
-      iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-      name: 'Snacks',
-    },
-  ];
+  
   return (
     <div className='flex flex-col justify-around sticky bottom-0'>
-      <div className='w-full border-box bottom-0'>
-        <div className='bg-blue-500 flex justify-around text-white w-full h-full'>
+      <div className='bg-white w-full bottom-0 p-3'>
+        <div className='flex justify-around w-full h-full'>
           {menuIcons.map((icon, i) => {
             const {
               iconComp: { inactive: IconComp },
@@ -30,9 +14,9 @@ export default function Footer() {
             return (
               <div
                 key={i}
-                className='below-menu-holder w-1/4 flex duration-700 justify-around'
+                className='flex flex-col items-center'
               >
-                <IconComp />
+                <IconComp className='text-3xl'/>
                 <span className='block'>{icon.name}</span>
               </div>
             );
@@ -42,3 +26,26 @@ export default function Footer() {
     </div>
   );
 }
+
+export const menuIcons = [
+  {
+    id: 1,
+    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
+    name: 'Snacks',
+  },
+  {
+    id: 2,
+    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
+    name: 'Snacks',
+  },
+  {
+    id: 3,
+    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
+    name: 'Snacks',
+  },
+  {
+    id: 4,
+    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
+    name: 'Snacks',
+  },
+];
