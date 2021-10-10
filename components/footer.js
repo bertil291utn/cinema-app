@@ -1,20 +1,24 @@
 import { IoFastFoodOutline } from 'react-icons/io5';
 import { IoFastFoodSharp } from 'react-icons/io5';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { refreshData } from '../utils/refresh';
+
+
 
 export default function Footer() {
   const [_tabs, setTab] = useState(menuIcons);
+  const router = useRouter();
 
   const selectedTab = (iconId) => () => {
-    console.log(iconId);
     _tabs.forEach((t) => {
       t.active = false;
     });
-
+    
     const index=_tabs.findIndex((t) => t.id == iconId)
     _tabs[index].active = true;
     setTab(_tabs);
-    console.log(_tabs);
+    refreshData(router);
   };
 
   return (
