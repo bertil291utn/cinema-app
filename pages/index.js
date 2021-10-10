@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Image from 'next/image';
-import { useState } from 'react';
 import Footer from '../components/footer';
+import { useState } from 'react';
 
 export default function Home() {
   const [_movies, setMovies] = useState(sortMovies(movies, 'new'));
