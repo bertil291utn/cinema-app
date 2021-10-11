@@ -48,7 +48,7 @@ export default function Home() {
           </div>
           <div className='my-5 text-center grid grid-cols-2 gap-3'>
             {_movies.map((movie, i) => (
-              <div key={`poster-${i}`} className='h-96 w-full relative '>
+              <div key={`poster-${i}`} className='h-96 w-full relative'>
                 <Image
                   src={movie.poster}
                   alt={`poster-${i}`}

@@ -1,13 +1,14 @@
+import dynamic from 'next/dynamic';
 import '../styles/globals.css';
 import './home.css';
-import dynamic from 'next/dynamic'
 
-const Footer = dynamic(() => import('../components/footer'))
-
+const Footer = dynamic(() => import('../components/footer'));
+const Navbar = dynamic(() => import('../components/navbar'));
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
+      <Navbar />
       <Component {...pageProps} />
       <Footer />
     </>
