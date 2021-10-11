@@ -6,7 +6,7 @@ import { refreshData } from '../utils/refresh';
 
 
 
-export default function Footer() {
+export default function Tab() {
   const [_tabs, setTab] = useState(menuIcons);
   const router = useRouter();
 
@@ -22,7 +22,7 @@ export default function Footer() {
   };
 
   return (
-    <div className='bg-white sticky bottom-0'>
+    <div className='bg-white sticky bottom-0 lg:hidden'>
       <div className='grid grid-cols-4 '>
         {_tabs.map((icon, i) => {
           const {

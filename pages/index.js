@@ -32,20 +32,20 @@ export default function Home() {
           <link rel='icon' href='/favicon.ico' />
         </Head>
 
-        <main className='container px-3 py-5'>
-          <div className='text-center'>
-            {_cities.map((city, i) => (
-              <button
-                key={`btn-city-${i}`}
-                onClick={selectByCity(city.id)}
-                className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 ${
-                  city.active ? 'bg-black text-white' : ''
-                }`}
-              >
-                {city.name}
-              </button>
-            ))}
-          </div>
+        <div className='py-5 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
+          {_cities.map((city, i) => (
+            <button
+              key={`btn-city-${i}`}
+              onClick={selectByCity(city.id)}
+              className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 ${
+                city.active ? 'bg-black text-white' : ''
+              }`}
+            >
+              {city.name}
+            </button>
+          ))}
+        </div>
+        <main className='container px-3'>
           <div className='my-5 text-center grid grid-cols-2 gap-3'>
             {_movies.map((movie, i) => (
               <div key={`poster-${i}`} className='h-96 w-full relative'>

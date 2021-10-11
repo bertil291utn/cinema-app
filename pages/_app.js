@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import '../styles/globals.css';
 import './home.css';
 
-const Footer = dynamic(() => import('../components/footer'));
+const Tab = dynamic(() => import('../components/tab'));
 const Navbar = dynamic(() => import('../components/navbar'));
 
 function MyApp({ Component, pageProps }) {
@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps }) {
     <>
       <Navbar />
       <Component {...pageProps} />
-      <Footer />
+      <Tab />
     </>
   );
 }
