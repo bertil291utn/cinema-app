@@ -32,7 +32,7 @@ export default function Home() {
           <link rel='icon' href='/favicon.ico' />
         </Head>
 
-        <div className='py-5 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
+        <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
           {_cities.map((city, i) => (
             <button
               key={`btn-city-${i}`}
