@@ -1,13 +1,23 @@
 import { IoFastFoodOutline } from 'react-icons/io5';
 import { IoFastFoodSharp } from 'react-icons/io5';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { refreshData } from '../utils/refresh';
-import { HideScroll } from 'react-hide-on-scroll';
 
 export default function Tab() {
   const [_tabs, setTab] = useState(menuIcons);
+  const [scrollUp, setScrollUp] = useState(false)
   const router = useRouter();
+
+
+  useEffect(() => {
+    let prevScrollpos = window.pageYOffset;
+    window.onscroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      setScrollUp(prevScrollpos > currentScrollPos);
+      prevScrollpos = currentScrollPos;
+    };
+  }, []);
 
   const selectedTab = (iconId) => () => {
     _tabs.forEach((t) => {
@@ -19,42 +29,35 @@ export default function Tab() {
     setTab(_tabs);
     refreshData(router);
   };
-  //   <HideScroll variant="down" showOnPageInit={false}>
-  //   <div className={classNames(styles.sticky, styles.hideScrollDown)}>
-  //     Hidden on scrolling down
-  //   </div>
-  // </HideScroll>
 
   return (
-    <HideScroll variant='down' showOnPageInit={false}>
-      <div className='bg-white sticky bottom-0 lg:hidden'>
-        <div className='grid grid-cols-4 '>
-          {_tabs.map((icon, i) => {
-            const {
-              iconComp: { inactive: IconCompIn, active: IconCompAc },
-            } = icon;
-            return (
-              <div
-                key={`tab-${i}`}
-                className='p-2 flex flex-col items-center justify-end'
-                onClick={selectedTab(icon.id)}
+    <div className={`bg-white sticky bottom-0 lg:hidden ${scrollUp?'block':'hidden'}`}>
+      <div className='grid grid-cols-4 '>
+        {_tabs.map((icon, i) => {
+          const {
+            iconComp: { inactive: IconCompIn, active: IconCompAc },
+          } = icon;
+          return (
+            <div
+              key={`tab-${i}`}
+              className='p-2 flex flex-col items-center justify-end'
+              onClick={selectedTab(icon.id)}
+            >
+              {icon.active ? (
+                <IconCompAc className='text-4xl' />
+              ) : (
+                <IconCompIn className='text-3xl' />
+              )}
+              <span
+                className={`block ${icon.active ? 'font-bold text-lg' : ''}`}
               >
-                {icon.active ? (
-                  <IconCompAc className='text-4xl' />
-                ) : (
-                  <IconCompIn className='text-3xl' />
-                )}
-                <span
-                  className={`block ${icon.active ? 'font-bold text-lg' : ''}`}
-                >
-                  {icon.name}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+                {icon.name}
+              </span>
+            </div>
+          );
+        })}
       </div>
-    </HideScroll>
+    </div>
   );
 }
 
