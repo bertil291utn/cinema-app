@@ -1,25 +1,28 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
+import axios from 'axios';
 
-export default function Home() {
-  const [_movies, setMovies] = useState(sortMovies(movies, 'new'));
+export default function Home({ films }) {
+  console.log(films);
+  const [_movies, setMovies] = useState(sortMovies(films, 'new'));
   const [_cities, setCities] = useState(cities);
 
   const selectByCity = (cityId) => () => {
-    setMovies(
+    setMovies((previousMovies) =>
       sortMovies(
-        movies.filter((m) => m.cityId.includes(cityId)),
+        previousMovies.filter((m) => m.cities.includes(cityId)),
         'new'
       )
     );
 
-    _cities.forEach((c) => {
-      c.active = false;
+    setCities((pCities) => {
+      pCities.forEach((c) => {
+        c.active = false;
+      });
+      pCities[pCities.findIndex((c) => c.id == cityId)].active = true;
+      return pCities;
     });
-    setCities(_cities);
-    _cities[_cities.findIndex((c) => c.id == cityId)].active = true;
-    setCities(_cities);
   };
 
   //sort by new estrenos
@@ -50,7 +53,7 @@ export default function Home() {
             {_movies.map((movie, i) => (
               <div key={`poster-${i}`} className='h-96 w-full relative'>
                 <Image
-                  src={movie.poster}
+                  src={movie.fullTitle.image}
                   alt={`poster-${i}`}
                   layout='fill'
                   objectFit='cover'
@@ -68,6 +71,37 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+export async function getStaticProps() {
+  const movieURL = `${process.env.URL}InTheaters/${process.env.API_KEY}`;
+  const res = await axios.get(movieURL);
+  const resp = await res.data;
+  const randomCities = [
+    [1, 2, 3, 4],
+    [1, 3, 4],
+    [1, 3],
+    [2, 3, 4],
+    [1, 2],
+  ];
+  const films = await Promise.all(
+    resp.items.map(async (f) => {
+      const titleURL = `${process.env.URL}Title/${process.env.API_KEY}/${f.id}/FullActor,FullCast,Posters,Images,Trailer`;
+      const resTitle = await axios.get(titleURL);
+      return {
+        ...f,
+        cities: randomCities[Math.floor(Math.random() * randomCities.length)],
+        new: (Math.random() * 100).toFixed() % 2 == 0,
+        fullTitle: await resTitle.data,
+      };
+    })
+  );
+
+  return {
+    props: {
+      films,
+    },
+  };
 }
 
 export const cities = [
