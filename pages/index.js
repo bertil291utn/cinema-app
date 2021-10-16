@@ -1,28 +1,36 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
-import axios from 'axios';
+import { collection, getDocs } from 'firebase/firestore';
+//Database
+// import '../initFirebase';
+import { db } from '../initFirebase';
 
-export default function Home({ films }) {
-  console.log(films);
-  const [_movies, setMovies] = useState(sortMovies(films, 'new'));
-  const [_cities, setCities] = useState(cities);
+export default function Home({ films, cities }) {
+  const [_movies, setMovies] = useState(
+    sortMovies(
+      films.filter((f) => f.active && f.cities.includes(cities[0].id)),
+      'new'
+    )
+  );
+  const [_cities, setCities] = useState(cities.filter((c) => c.active));
 
   const selectByCity = (cityId) => () => {
-    setMovies((previousMovies) =>
+    setMovies(
       sortMovies(
-        previousMovies.filter((m) => m.cities.includes(cityId)),
+        films.filter((f) => f.active && f.cities.includes(cityId)),
         'new'
       )
     );
 
-    setCities((pCities) => {
-      pCities.forEach((c) => {
-        c.active = false;
-      });
-      pCities[pCities.findIndex((c) => c.id == cityId)].active = true;
-      return pCities;
-    });
+    setCities(
+      (pCities) =>
+        pCities.map((c) => {
+          if (c.id == cityId) c.currentCity = true;
+          else c.currentCity = false;
+          return c;
+        })
+    );
   };
 
   //sort by new estrenos
@@ -40,8 +48,8 @@ export default function Home({ films }) {
             <button
               key={`btn-city-${i}`}
               onClick={selectByCity(city.id)}
-              className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 ${
-                city.active ? 'bg-black text-white' : ''
+              className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 capitalize ${
+                city.currentCity ? 'bg-black text-white' : ''
               }`}
             >
               {city.name}
@@ -53,7 +61,7 @@ export default function Home({ films }) {
             {_movies.map((movie, i) => (
               <div key={`poster-${i}`} className='h-96 w-full relative'>
                 <Image
-                  src={movie.fullTitle.image}
+                  src={movie.poster}
                   alt={`poster-${i}`}
                   layout='fill'
                   objectFit='cover'
@@ -74,81 +82,28 @@ export default function Home({ films }) {
 }
 
 export async function getStaticProps() {
-  const movieURL = `${process.env.URL}InTheaters/${process.env.API_KEY}`;
-  const res = await axios.get(movieURL);
-  const resp = await res.data;
-  const randomCities = [
-    [1, 2, 3, 4],
-    [1, 3, 4],
-    [1, 3],
-    [2, 3, 4],
-    [1, 2],
-  ];
-  const films = await Promise.all(
-    resp.items.map(async (f) => {
-      const titleURL = `${process.env.URL}Title/${process.env.API_KEY}/${f.id}/FullActor,FullCast,Posters,Images,Trailer`;
-      const resTitle = await axios.get(titleURL);
-      return {
-        ...f,
-        cities: randomCities[Math.floor(Math.random() * randomCities.length)],
-        new: (Math.random() * 100).toFixed() % 2 == 0,
-        fullTitle: await resTitle.data,
-      };
-    })
-  );
+  const moviesResponse = await getDocs(collection(db, 'movies'));
+  const films = moviesResponse.docs.map((m) => ({
+    id: m.id,
+    ...m.data(),
+  }));
+  console.log(films);
 
+  //cities
+  const citiesResponse = await getDocs(collection(db, 'cities'));
+  const cities = citiesResponse.docs.map((c, i) => ({
+    id: +c.id,
+    currentCity: i == 0,
+    ...c.data(),
+  }));
+  console.log(cities);
   return {
     props: {
       films,
+      cities,
     },
   };
 }
-
-export const cities = [
-  { id: 1, name: 'Tumbaco', active: true },
-  { id: 2, name: 'Los Chillos', active: false },
-  { id: 3, name: 'Cayambe', active: false },
-  { id: 4, name: 'El Coca', active: false },
-];
-export let movies = [
-  {
-    id: 1,
-    name: 'Coda',
-    poster: 'https://www.cineplex.com.ec/customers/fotos/poster_coda.jpg',
-    new: true,
-    cityId: [1, 2, 3, 4],
-  },
-  {
-    id: 2,
-    name: 'Huevitos',
-    poster: 'https://www.cineplex.com.ec/customers/fotos/poster_huevitos.jpg',
-    new: false,
-    cityId: [1, 2, 3, 4],
-  },
-  {
-    id: 3,
-    name: 'Casa oscura',
-    poster:
-      'https://www.cineplex.com.ec/customers/fotos/poster_lacasaoscura2.jpg',
-    new: false,
-    cityId: [1, 3, 4],
-  },
-  {
-    id: 4,
-    name: 'James Bond 007',
-    poster: 'https://www.cineplex.com.ec/customers/fotos/poster_007.jpg',
-    new: true,
-    cityId: [1, 2, 3, 4],
-  },
-  {
-    id: 5,
-    name: 'Venom',
-    poster: 'https://www.cineplex.com.ec/customers/fotos/poster_venom3.jpg',
-    new: true,
-    cityId: [1, 2],
-  },
-  ,
-];
 
 export const sortMovies = (movies, field) =>
   movies.sort((x, y) => (x[field] === y[field] ? 0 : x[field] ? -1 : 1));
