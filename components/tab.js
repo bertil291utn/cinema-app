@@ -31,7 +31,7 @@ export default function Tab() {
   };
 
   return (
-    <div className={`bg-white sticky bottom-0 lg:hidden ${scrollUp?'block':'hidden'}`}>
+    <div className={`bg-white fixed bottom-0 w-full lg:hidden ${scrollUp?'block':'hidden'}`}>
       <div className='grid grid-cols-4 '>
         {_tabs.map((icon, i) => {
           const {
