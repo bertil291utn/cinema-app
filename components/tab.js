@@ -6,6 +6,7 @@ import {
 } from 'react-icons/io5';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 // import { refreshData } from '../utils/refresh';
 
 export default function Tab() {
@@ -45,20 +46,23 @@ export default function Tab() {
             iconComp: { inactive: IconCompIn, active: IconCompAc },
           } = icon;
           return (
-            <div
-              key={`tab-${i}`}
-              className='p-2 flex flex-col items-center justify-end'
-              onClick={selectedTab(icon.id)}
-            >
-              {icon.active ? (
-                <IconCompAc className='text-4xl' />
-              ) : (
-                <IconCompIn className='text-3xl' />
-              )}
-              <span className={`block ${icon.active ? 'font-bold' : ''}`}>
-                {icon.name}
-              </span>
-            </div>
+            <Link href={icon.href} key={`tab-${i}`}>
+              <a>
+                <div
+                  className='p-2 flex flex-col items-center justify-end'
+                  onClick={selectedTab(icon.id)}
+                >
+                  {icon.active ? (
+                    <IconCompAc className='text-4xl' />
+                  ) : (
+                    <IconCompIn className='text-3xl' />
+                  )}
+                  <span className={`block ${icon.active ? 'font-bold' : ''}`}>
+                    {icon.name}
+                  </span>
+                </div>
+              </a>
+            </Link>
           );
         })}
       </div>
@@ -72,23 +76,27 @@ export const menuIcons = [
     iconComp: { inactive: IoHomeOutline, active: IoHomeSharp },
     name: 'Home',
     active: true,
+    href: '/',
   },
   {
     id: 2,
     iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
     name: 'Snacks',
     active: false,
+    href: '/',
   },
   {
     id: 3,
     iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
     name: 'Snacks',
     active: false,
+    href: '/',
   },
   {
     id: 4,
     iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
     name: 'Snacks',
     active: false,
+    href: '/',
   },
 ];
