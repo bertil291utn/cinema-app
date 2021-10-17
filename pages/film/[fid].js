@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 const FilmDetail = ({ film }) => {
   return (
-    <Layout showNavBar={false}>
+    <Layout subDir>
       {film ? (
         <div className='flex flex-row pl-6'>
           <Link href='/'>

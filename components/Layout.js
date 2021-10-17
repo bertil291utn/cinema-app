@@ -3,12 +3,12 @@ import dynamic from 'next/dynamic';
 const Tab = dynamic(() => import('../components/tab'));
 const Navbar = dynamic(() => import('../components/navbar'));
 
-const Layout = ({ showNavBar=true,children }) => {
+const Layout = ({ subDir,children }) => {
   return (
     <>
-      {showNavBar && <Navbar />}
+      {!subDir && <Navbar />}
       {children}
-      <Tab />
+      {!subDir && <Tab />}
     </>
   );
 };

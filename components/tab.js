@@ -53,7 +53,7 @@ export default function Tab() {
                   onClick={selectedTab(icon.id)}
                 >
                   {icon.active ? (
-                    <IconCompAc className='text-4xl' />
+                    <IconCompAc className='text-3xl' />
                   ) : (
                     <IconCompIn className='text-3xl' />
                   )}
