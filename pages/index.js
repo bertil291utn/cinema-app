@@ -1,9 +1,9 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import { useState } from 'react';
+import { getPlaiceholder } from 'plaiceholder';
 import { collection, getDocs } from 'firebase/firestore';
 //Database
-// import '../initFirebase';
 import { db } from '../initFirebase';
 
 export default function Home({ films, cities }) {
@@ -23,13 +23,12 @@ export default function Home({ films, cities }) {
       )
     );
 
-    setCities(
-      (pCities) =>
-        pCities.map((c) => {
-          if (c.id == cityId) c.currentCity = true;
-          else c.currentCity = false;
-          return c;
-        })
+    setCities((pCities) =>
+      pCities.map((c) => {
+        if (c.id == cityId) c.currentCity = true;
+        else c.currentCity = false;
+        return c;
+      })
     );
   };
 
@@ -61,10 +60,12 @@ export default function Home({ films, cities }) {
             {_movies.map((movie, i) => (
               <div key={`poster-${i}`} className='h-96 w-full relative'>
                 <Image
-                  src={movie.poster}
+                  src={movie.poster.URL}
                   alt={`poster-${i}`}
                   layout='fill'
                   objectFit='cover'
+                  placeholder='blur'
+                  blurDataURL={movie.poster.blurDataURL}
                   className='rounded-lg'
                 />
                 {movie.new && (
@@ -83,10 +84,23 @@ export default function Home({ films, cities }) {
 
 export async function getStaticProps() {
   const moviesResponse = await getDocs(collection(db, 'movies'));
-  const films = moviesResponse.docs.map((m) => ({
+
+  let films;
+  films = moviesResponse.docs.map((m) => ({
     id: m.id,
     ...m.data(),
   }));
+
+  //replace poster with url and blur base64
+  films = await Promise.all(
+    films.map(async (film) => {
+      const { base64, img } = await getPlaiceholder(film.poster);
+      return {
+        ...film,
+        poster: { URL: img.src, blurDataURL: base64 },
+      };
+    })
+  );
   console.log(films);
 
   //cities
