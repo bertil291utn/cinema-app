@@ -2,12 +2,12 @@ import { IoFastFoodOutline } from 'react-icons/io5';
 import { IoFastFoodSharp } from 'react-icons/io5';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { refreshData } from '../utils/refresh';
+// import { refreshData } from '../utils/refresh';
 
 export default function Tab() {
   const [_tabs, setTab] = useState(menuIcons);
   const [scrollUp, setScrollUp] = useState(false)
-  const router = useRouter();
+  // const router = useRouter();
 
 
   useEffect(() => {
@@ -20,14 +20,14 @@ export default function Tab() {
   }, []);
 
   const selectedTab = (iconId) => () => {
-    _tabs.forEach((t) => {
-      t.active = false;
-    });
-
-    const index = _tabs.findIndex((t) => t.id == iconId);
-    _tabs[index].active = true;
-    setTab(_tabs);
-    refreshData(router);
+    setTab((pTabs) =>
+      pTabs.map((t) => {
+        if (t.id == iconId) t.active = true;
+        else t.active = false;
+        return t;
+      })
+    );
+    // refreshData(router);
   };
 
   return (
@@ -49,7 +49,7 @@ export default function Tab() {
                 <IconCompIn className='text-3xl' />
               )}
               <span
-                className={`block ${icon.active ? 'font-bold text-lg' : ''}`}
+                className={`block ${icon.active ? 'font-bold' : ''}`}
               >
                 {icon.name}
               </span>
