@@ -4,6 +4,7 @@ import { getPlaiceholder } from 'plaiceholder';
 import { collection, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
 import { db } from '../initFirebase';
+import Layout from '../components/Layout';
 
 export default function Home({ films, cities }) {
   const [_movies, setMovies] = useState(
@@ -33,7 +34,7 @@ export default function Home({ films, cities }) {
 
   //sort by new estrenos
   return (
-      <div>
+      <Layout>
         <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
           {_cities.map((city, i) => (
             <button
@@ -63,7 +64,7 @@ export default function Home({ films, cities }) {
                       objectFit='cover'
                       placeholder='blur'
                       blurDataURL={movie.poster.blurDataURL}
-                      className='rounded-lg'
+                      className='rounded-2xl'
                     />
                     {movie.new && (
                       <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
@@ -76,7 +77,7 @@ export default function Home({ films, cities }) {
             ))}
           </div>
         </main>
-      </div>
+      </Layout>
   );
 }
 
