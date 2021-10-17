@@ -1,14 +1,17 @@
-import { IoFastFoodOutline } from 'react-icons/io5';
-import { IoFastFoodSharp } from 'react-icons/io5';
+import {
+  IoFastFoodOutline,
+  IoFastFoodSharp,
+  IoHomeSharp,
+  IoHomeOutline,
+} from 'react-icons/io5';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 // import { refreshData } from '../utils/refresh';
 
 export default function Tab() {
   const [_tabs, setTab] = useState(menuIcons);
-  const [scrollUp, setScrollUp] = useState(false)
+  const [scrollUp, setScrollUp] = useState(false);
   // const router = useRouter();
-
 
   useEffect(() => {
     let prevScrollpos = window.pageYOffset;
@@ -31,7 +34,11 @@ export default function Tab() {
   };
 
   return (
-    <div className={`bg-white fixed bottom-0 w-full lg:hidden ${scrollUp?'block':'hidden'}`}>
+    <div
+      className={`bg-white fixed bottom-0 w-full lg:hidden ${
+        scrollUp ? 'block' : 'hidden'
+      }`}
+    >
       <div className='grid grid-cols-4 '>
         {_tabs.map((icon, i) => {
           const {
@@ -48,9 +55,7 @@ export default function Tab() {
               ) : (
                 <IconCompIn className='text-3xl' />
               )}
-              <span
-                className={`block ${icon.active ? 'font-bold' : ''}`}
-              >
+              <span className={`block ${icon.active ? 'font-bold' : ''}`}>
                 {icon.name}
               </span>
             </div>
@@ -64,9 +69,9 @@ export default function Tab() {
 export const menuIcons = [
   {
     id: 1,
-    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-    name: 'Snacks',
-    active: false,
+    iconComp: { inactive: IoHomeOutline, active: IoHomeSharp },
+    name: 'Home',
+    active: true,
   },
   {
     id: 2,
