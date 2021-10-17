@@ -2,19 +2,38 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { getPlaiceholder } from 'plaiceholder';
 import Layout from '../../components/Layout';
 import { db } from '../../initFirebase';
+import Link from 'next/link';
+
+import { IoChevronBackOutline } from 'react-icons/io5';
+import Image from 'next/image';
 
 const FilmDetail = ({ film }) => {
   return (
     <Layout showNavBar={false}>
-      <div className='px-3 py-1'>
-        {film ? (
-          <div>
-            <p>{film.name}</p>
+      {film ? (
+        <div className='flex flex-row pl-6'>
+          <Link href='/'>
+            <a>
+              <div className='mr-6 mt-10'>
+                <IoChevronBackOutline className='text-3xl' />
+              </div>
+            </a>
+          </Link>
+          <div className='h-96 w-full relative'>
+            <Image
+              src={film.poster.URL}
+              alt='film-poster'
+              layout='fill'
+              objectFit='cover'
+              placeholder='blur'
+              blurDataURL={film.poster.blurDataURL}
+              className='rounded-bl-6xl'
+            />
           </div>
-        ) : (
-          <div>Theres no movie info</div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div>Theres no movie info</div>
+      )}
     </Layout>
   );
 };
