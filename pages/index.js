@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { getPlaiceholder } from 'plaiceholder';
 import { collection, getDocs } from 'firebase/firestore';
-//Database
+import Link from 'next/link';
 import { db } from '../initFirebase';
 
 export default function Home({ films, cities }) {
@@ -58,22 +58,29 @@ export default function Home({ films, cities }) {
         <main className='container px-3'>
           <div className='my-5 text-center grid grid-cols-2 gap-3'>
             {_movies.map((movie, i) => (
-              <div key={`poster-${i}`} className='h-96 w-full relative'>
-                <Image
-                  src={movie.poster.URL}
-                  alt={`poster-${i}`}
-                  layout='fill'
-                  objectFit='cover'
-                  placeholder='blur'
-                  blurDataURL={movie.poster.blurDataURL}
-                  className='rounded-lg'
-                />
-                {movie.new && (
-                  <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
-                    Estreno
-                  </span>
-                )}
-              </div>
+              <Link
+                href={`/film/${encodeURIComponent(movie.id)}`}
+                key={`poster-${i}`}
+              >
+                <a>
+                  <div className='h-96 w-full relative'>
+                    <Image
+                      src={movie.poster.URL}
+                      alt={`poster-${i}`}
+                      layout='fill'
+                      objectFit='cover'
+                      placeholder='blur'
+                      blurDataURL={movie.poster.blurDataURL}
+                      className='rounded-lg'
+                    />
+                    {movie.new && (
+                      <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
+                        Estreno
+                      </span>
+                    )}
+                  </div>
+                </a>
+              </Link>
             ))}
           </div>
         </main>
@@ -102,7 +109,7 @@ export async function getStaticProps() {
     })
   );
   console.log(films);
-
+  
   //cities
   const citiesResponse = await getDocs(collection(db, 'cities'));
   const cities = citiesResponse.docs.map((c, i) => ({
