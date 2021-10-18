@@ -67,7 +67,9 @@ const FilmDetail = ({ film, lefTabs }) => {
               ))}
             </ul>
             <div className='mt-5 ml-8'>
-              <Horarios />
+              {_leftTabs.find((t) => t.active).id == 1 && <Info />}
+              {_leftTabs.find((t) => t.active).id == 2 && <Horarios />}
+              {_leftTabs.find((t) => t.active).id == 3 && <Cast/>}
             </div>
           </div>
         </>
