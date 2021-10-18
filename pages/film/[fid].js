@@ -4,7 +4,7 @@ import Layout from '../../components/Layout';
 import { db } from '../../initFirebase';
 import Link from 'next/link';
 
-import { IoChevronBackOutline } from 'react-icons/io5';
+import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 
 const FilmDetail = ({ film }) => {
@@ -29,6 +29,12 @@ const FilmDetail = ({ film }) => {
               blurDataURL={film.poster.blurDataURL}
               className='rounded-bl-6xl'
             />
+            <div className='absolute bottom-9 left-9'>
+              <button className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'>
+                <IoPlay className='text-white text-3xl' 
+                />
+              </button>
+            </div>
           </div>
         </div>
       ) : (
