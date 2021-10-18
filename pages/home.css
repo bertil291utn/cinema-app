@@ -5,3 +5,8 @@
 .rounded-bl-6xl {
   border-bottom-left-radius: 6rem;
 }
+
+.text-rotate-90-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}

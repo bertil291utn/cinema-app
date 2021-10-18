@@ -40,12 +40,12 @@ const FilmDetail = ({ film }) => {
           </div>
 
           <div className='flex flex-row pl-6'>
-            <ul className='grid grid-rows-3 gap-3 items-start h-52 text-lg'>
-              <li className='transform rotate-90'>Review</li>
-              <li className='transform rotate-90'>Info</li>
-              <li className='transform rotate-90'>Info</li>
+            <ul className='flex flex-col justify-between items-start h-52 text-lg'>
+              <li className='text-rotate-90-rl'>Info</li>
+              <li className='text-rotate-90-rl'>Horarios</li>
+              <li className='text-rotate-90-rl'>Cast</li>
             </ul>
-            <div className='mt-5'>this is movie info</div>
+            <div className='mt-5 ml-8'>this is movie info</div>
           </div>
         </>
       ) : (
