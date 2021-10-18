@@ -11,32 +11,43 @@ const FilmDetail = ({ film }) => {
   return (
     <Layout subDir>
       {film ? (
-        <div className='flex flex-row pl-6'>
-          <Link href='/'>
-            <a>
-              <div className='mr-6 mt-10'>
-                <IoChevronBackOutline className='text-3xl' />
+        <>
+          <div className='flex flex-row pl-6'>
+            <div className='mr-6 mt-10 h-10'>
+              <Link href='/'>
+                <a>
+                  <IoChevronBackOutline className='text-3xl' />
+                </a>
+              </Link>
+            </div>
+
+            <div className='h-96 w-full relative'>
+              <Image
+                src={film.poster.URL}
+                alt='film-poster'
+                layout='fill'
+                objectFit='cover'
+                placeholder='blur'
+                blurDataURL={film.poster.blurDataURL}
+                className='rounded-bl-6xl'
+              />
+              <div className='absolute bottom-9 left-9'>
+                <button className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'>
+                  <IoPlay className='text-white text-3xl' />
+                </button>
               </div>
-            </a>
-          </Link>
-          <div className='h-96 w-full relative'>
-            <Image
-              src={film.poster.URL}
-              alt='film-poster'
-              layout='fill'
-              objectFit='cover'
-              placeholder='blur'
-              blurDataURL={film.poster.blurDataURL}
-              className='rounded-bl-6xl'
-            />
-            <div className='absolute bottom-9 left-9'>
-              <button className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'>
-                <IoPlay className='text-white text-3xl' 
-                />
-              </button>
             </div>
           </div>
-        </div>
+
+          <div className='flex flex-row pl-6'>
+            <ul className='grid grid-rows-3 gap-3 items-start h-52 text-lg'>
+              <li className='transform rotate-90'>Review</li>
+              <li className='transform rotate-90'>Info</li>
+              <li className='transform rotate-90'>Info</li>
+            </ul>
+            <div className='mt-5'>this is movie info</div>
+          </div>
+        </>
       ) : (
         <div>Theres no movie info</div>
       )}
