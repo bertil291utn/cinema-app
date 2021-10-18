@@ -3,17 +3,23 @@ import { getPlaiceholder } from 'plaiceholder';
 import Layout from '../../components/Layout';
 import { db } from '../../initFirebase';
 import Link from 'next/link';
-import { useState,useEffect } from 'react';
-
+import { useState, useEffect } from 'react';
 
 import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 
-const FilmDetail = ({ film,lefTabs }) => {
-  
+const FilmDetail = ({ film, lefTabs }) => {
   const [_leftTabs, setLeftTabs] = useState(lefTabs);
 
-  const updateTabs = (tabId) => () => {};
+  const updateTabs = (tabId) => () => {
+    setLeftTabs((pTabs) =>
+      pTabs.map((t) => {
+        t.active = false;
+        if (t.id == tabId) t.active = true;
+        return t;
+      })
+    );
+  };
 
   return (
     <Layout subDir>
@@ -61,7 +67,7 @@ const FilmDetail = ({ film,lefTabs }) => {
               ))}
             </ul>
             <div className='mt-5 ml-8'>
-              <Horarios/>
+              <Horarios />
             </div>
           </div>
         </>
@@ -104,19 +110,18 @@ export async function getStaticProps({ params }) {
   console.log('film', film);
 
   const lefTabs = [
-    { id: 1, name: 'Info', active: true},
-    { id: 2, name: 'Horarios', active: false},
-    { id: 3, name: 'Cast', active: false},
+    { id: 1, name: 'Info', active: true },
+    { id: 2, name: 'Horarios', active: false },
+    { id: 3, name: 'Cast', active: false },
   ];
 
   return {
     props: {
       film,
-      lefTabs
+      lefTabs,
     },
   };
 }
-
 
 export const Info = () => {
   return <div>this is info</div>;

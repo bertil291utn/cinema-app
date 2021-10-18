@@ -26,8 +26,8 @@ export default function Tab() {
   const selectedTab = (iconId) => () => {
     setTab((pTabs) =>
       pTabs.map((t) => {
+        t.active = false;
         if (t.id == iconId) t.active = true;
-        else t.active = false;
         return t;
       })
     );

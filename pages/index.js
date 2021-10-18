@@ -25,8 +25,8 @@ export default function Home({ films, cities }) {
 
     setCities((pCities) =>
       pCities.map((c) => {
+        c.currentCity = false;
         if (c.id == cityId) c.currentCity = true;
-        else c.currentCity = false;
         return c;
       })
     );
@@ -34,50 +34,50 @@ export default function Home({ films, cities }) {
 
   //sort by new estrenos
   return (
-      <Layout>
-        <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
-          {_cities.map((city, i) => (
-            <button
-              key={`btn-city-${i}`}
-              onClick={selectByCity(city.id)}
-              className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 capitalize ${
-                city.currentCity ? 'bg-black text-white' : ''
-              }`}
+    <Layout>
+      <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
+        {_cities.map((city, i) => (
+          <button
+            key={`btn-city-${i}`}
+            onClick={selectByCity(city.id)}
+            className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 capitalize ${
+              city.currentCity ? 'bg-black text-white' : ''
+            }`}
+          >
+            {city.name}
+          </button>
+        ))}
+      </div>
+      <main className='container px-3'>
+        <div className='my-5 text-center grid grid-cols-2 gap-3'>
+          {_movies.map((movie, i) => (
+            <Link
+              href={`/film/${encodeURIComponent(movie.id)}`}
+              key={`poster-${i}`}
             >
-              {city.name}
-            </button>
+              <a>
+                <div className='h-96 w-full relative'>
+                  <Image
+                    src={movie.poster.URL}
+                    alt={`poster-${i}`}
+                    layout='fill'
+                    objectFit='cover'
+                    placeholder='blur'
+                    blurDataURL={movie.poster.blurDataURL}
+                    className='rounded-2xl'
+                  />
+                  {movie.new && (
+                    <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
+                      Estreno
+                    </span>
+                  )}
+                </div>
+              </a>
+            </Link>
           ))}
         </div>
-        <main className='container px-3'>
-          <div className='my-5 text-center grid grid-cols-2 gap-3'>
-            {_movies.map((movie, i) => (
-              <Link
-                href={`/film/${encodeURIComponent(movie.id)}`}
-                key={`poster-${i}`}
-              >
-                <a>
-                  <div className='h-96 w-full relative'>
-                    <Image
-                      src={movie.poster.URL}
-                      alt={`poster-${i}`}
-                      layout='fill'
-                      objectFit='cover'
-                      placeholder='blur'
-                      blurDataURL={movie.poster.blurDataURL}
-                      className='rounded-2xl'
-                    />
-                    {movie.new && (
-                      <span className='absolute left-1 top-1 inline-block rounded-full text-white bg-red-700 px-2 py-1 text-xs font-bold mr-3'>
-                        Estreno
-                      </span>
-                    )}
-                  </div>
-                </a>
-              </Link>
-            ))}
-          </div>
-        </main>
-      </Layout>
+      </main>
+    </Layout>
   );
 }
 
@@ -101,7 +101,7 @@ export async function getStaticProps() {
     })
   );
   console.log(films);
-  
+
   //cities
   const citiesResponse = await getDocs(collection(db, 'cities'));
   const cities = citiesResponse.docs.map((c, i) => ({
