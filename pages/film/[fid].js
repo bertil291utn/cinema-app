@@ -66,7 +66,7 @@ const FilmDetail = ({ film, lefTabs }) => {
                 </li>
               ))}
             </ul>
-            <div className='ml-8'>
+            <div className='mt-5 ml-12 mr-5'>
               {_leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
               {_leftTabs.find((t) => t.active).id == 2 && (
                 <Horarios film={film} />
@@ -129,19 +129,29 @@ export async function getStaticProps({ params }) {
 
 export const Info = ({ film }) => {
   return (
-    <div className='px-5'>
-      <p className='my-5 text-3xl font-bold'>{film.name}</p>
+    <div className=''>
+      <p className='mb-5 text-3xl font-bold'>{film.name}</p>
       <div className='contenido text-gray-400'>
         <div className='flex flex-row'>
-          <div className='flex flex-row justify-between'>
+          <div className='flex flex-row'>
             {film.genre.split(',').map((genre, i) => (
-              <p key={`genre-${i}`} className='capitalize'>
+              <p key={`genre-${i}`} className='capitalize mr-3'>
                 {genre}
               </p>
             ))}
           </div>
           <p className='mx-3'>|</p>
           <p className='font-bold'>{film.duration}</p>
+        </div>
+        <div className='my-2'>
+          {film.type.split(',').map((t, i) => (
+            <span
+              key={`type-${i}`}
+              className='inline-block rounded-full px-5 py-1 text-xs font-bold mr-3 border uppercase'
+            >
+              {t}
+            </span>
+          ))}
         </div>
       </div>
     </div>
