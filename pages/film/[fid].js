@@ -134,14 +134,14 @@ export const Info = ({ film }) => {
       <p className='mb-5 text-3xl font-bold'>{film.name}</p>
       <div className='contenido text-gray-400'>
         <div className='flex flex-row'>
-          <div className='flex flex-row'>
+          <ul className='flex flex-row'>
             {film.genre.split(',').map((genre, i) => (
-              <p key={`genre-${i}`} className='capitalize mr-3'>
+              <li key={`genre-${i}`} className='capitalize mr-3 last:mr-0'>
                 {genre}
-              </p>
+              </li>
             ))}
-          </div>
-          <p className='mx-3'>|</p>
+          </ul>
+          <p className='mx-4'>&#183;</p>
           <p className='font-bold'>{film.duration}</p>
         </div>
         <div className='my-2'>
@@ -154,6 +154,16 @@ export const Info = ({ film }) => {
             </span>
           ))}
         </div>
+
+        <ul className='flex flex-row'>
+          <li className='capitalize'>{film.language}</li>
+          <li className='mx-4'>&#183;</li>
+          <li className='font-bold'>
+            {film.restriction == 0
+              ? 'Todo p\xFAblico'
+              : film.restriction + ' a\xF1os'}
+          </li>
+        </ul>
         <div className='my-5'>
           <ReadMoreReact
             text={film.plot}
