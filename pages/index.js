@@ -5,6 +5,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
 import { db } from '../initFirebase';
 import Layout from '../components/Layout';
+import ChipButton from '../components/ChipButton';
 
 export default function Home({ films, cities }) {
   const [_movies, setMovies] = useState(
@@ -13,22 +14,18 @@ export default function Home({ films, cities }) {
       'new'
     )
   );
-  const [_cities, setCities] = useState(cities.filter((c) => c.active));
+  let _cities = cities.filter((c) => c.active);
+  _cities = _cities.map((c) => ({
+    ...c,
+    active: c.currentCity,
+  }));
 
-  const selectByCity = (cityId) => () => {
+  const selectByCity = (cityId) => {
     setMovies(
       sortMovies(
         films.filter((f) => f.active && f.cities.includes(cityId)),
         'new'
       )
-    );
-
-    setCities((pCities) =>
-      pCities.map((c) => {
-        c.currentCity = false;
-        if (c.id == cityId) c.currentCity = true;
-        return c;
-      })
     );
   };
 
@@ -36,17 +33,7 @@ export default function Home({ films, cities }) {
   return (
     <Layout>
       <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
-        {_cities.map((city, i) => (
-          <button
-            key={`btn-city-${i}`}
-            onClick={selectByCity(city.id)}
-            className={`rounded-full border border-black px-3 py-1 mr-3 mb-3 capitalize ${
-              city.currentCity ? 'bg-black text-white' : ''
-            }`}
-          >
-            {city.name}
-          </button>
-        ))}
+        <ChipButton onClick={selectByCity} items={_cities} />
       </div>
       <main className='container px-3'>
         <div className='my-5 text-center grid grid-cols-2 gap-3'>

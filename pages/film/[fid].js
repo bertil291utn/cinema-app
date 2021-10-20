@@ -26,7 +26,7 @@ const FilmDetail = ({ film, lefTabs }) => {
       {film ? (
         <>
           <div className='flex flex-row pl-6'>
-            <div className='mr-6 mt-10 h-10'>
+            <div className='mr-10 mt-10 h-10'>
               <Link href='/'>
                 <a>
                   <IoChevronBackOutline className='text-3xl' />
@@ -66,10 +66,12 @@ const FilmDetail = ({ film, lefTabs }) => {
                 </li>
               ))}
             </ul>
-            <div className='mt-5 ml-8'>
-              {_leftTabs.find((t) => t.active).id == 1 && <Info />}
-              {_leftTabs.find((t) => t.active).id == 2 && <Horarios />}
-              {_leftTabs.find((t) => t.active).id == 3 && <Cast/>}
+            <div className='ml-8'>
+              {_leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
+              {_leftTabs.find((t) => t.active).id == 2 && (
+                <Horarios film={film} />
+              )}
+              {_leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
             </div>
           </div>
         </>
@@ -125,8 +127,25 @@ export async function getStaticProps({ params }) {
   };
 }
 
-export const Info = () => {
-  return <div>this is info</div>;
+export const Info = ({ film }) => {
+  return (
+    <div className='px-5'>
+      <p className='my-5 text-3xl font-bold'>{film.name}</p>
+      <div className='contenido text-gray-400'>
+        <div className='flex flex-row'>
+          <div className='flex flex-row justify-between'>
+            {film.genre.split(',').map((genre, i) => (
+              <p key={`genre-${i}`} className='capitalize'>
+                {genre}
+              </p>
+            ))}
+          </div>
+          <p className='mx-3'>|</p>
+          <p className='font-bold'>{film.duration}</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export const Horarios = () => {
