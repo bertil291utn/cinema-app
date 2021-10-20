@@ -10,3 +10,8 @@
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
+
+.read-more-button {
+  color: #476FB6;
+  font-weight: bold;
+}

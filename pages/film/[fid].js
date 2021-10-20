@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 
 import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
+import ReadMoreReact from 'read-more-react';
 
 const FilmDetail = ({ film, lefTabs }) => {
   const [_leftTabs, setLeftTabs] = useState(lefTabs);
@@ -66,7 +67,7 @@ const FilmDetail = ({ film, lefTabs }) => {
                 </li>
               ))}
             </ul>
-            <div className='mt-5 ml-12 mr-5'>
+            <div className='mt-5 ml-12 mr-8'>
               {_leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
               {_leftTabs.find((t) => t.active).id == 2 && (
                 <Horarios film={film} />
@@ -152,6 +153,15 @@ export const Info = ({ film }) => {
               {t}
             </span>
           ))}
+        </div>
+        <div className='my-5'>
+          <ReadMoreReact
+            text={film.plot}
+            readMoreText={'Leer m\xE1s'}
+            min={30}
+            ideal={40}
+            max={50}
+          />
         </div>
       </div>
     </div>
