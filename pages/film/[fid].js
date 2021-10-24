@@ -10,7 +10,7 @@ import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
 
 const FilmDetail = ({ film, lefTabs }) => {
-  const [_leftTabs, setLeftTabs] = useState(lefTabs);
+  const [_leftTabs, setLeftTabs] = useState(lefTabs.filter(t=>t.displayActive));
 
   const updateTabs = (tabId) => () => {
     setLeftTabs((pTabs) =>
@@ -46,7 +46,10 @@ const FilmDetail = ({ film, lefTabs }) => {
                 className='rounded-bl-6xl'
               />
               <div className='absolute bottom-9 left-9'>
-                <button className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'>
+                <button
+                  className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'
+                  onClick={() => window.open(film.trailer, '_blank')}
+                >
                   <IoPlay className='text-white text-3xl' />
                 </button>
               </div>
@@ -54,11 +57,11 @@ const FilmDetail = ({ film, lefTabs }) => {
           </div>
 
           <div className='flex flex-row pl-6'>
-            <ul className='flex flex-col justify-between items-start h-64 text-lg'>
+            <ul className='flex flex-col items-start text-lg'>
               {_leftTabs.map((t) => (
                 <li
                   key={`tab-${t.id}`}
-                  className={`text-rotate-90-rl ${
+                  className={`text-rotate-90-rl mb-10 ${
                     t.active ? 'font-bold' : 'text-gray-400'
                   }`}
                   onClick={updateTabs(t.id)}
@@ -115,9 +118,9 @@ export async function getStaticProps({ params }) {
   console.log('film', film);
 
   const lefTabs = [
-    { id: 1, name: 'Info', active: true },
-    { id: 2, name: 'Horarios', active: false },
-    { id: 3, name: 'Cast', active: false },
+    { id: 1, name: 'Info', active: true,displayActive:true },
+    { id: 2, name: 'Vermouth', active: false,displayActive:false },
+    { id: 3, name: 'Cast', active: false,displayActive:true },
   ];
 
   return {
