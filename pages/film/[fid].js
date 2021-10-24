@@ -9,7 +9,12 @@ import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
 
-const FilmDetail = ({ film, lefTabs }) => {
+const FilmDetail = ({ film}) => {
+  const lefTabs = [
+    { id: 1, name: 'Info', active: true,displayActive:true },
+    { id: 2, name: 'Vermouth', active: false,displayActive:false },
+    { id: 3, name: 'Cast', active: false,displayActive:true },
+  ];
   const [_leftTabs, setLeftTabs] = useState(lefTabs.filter(t=>t.displayActive));
 
   const updateTabs = (tabId) => () => {
@@ -117,16 +122,11 @@ export async function getStaticProps({ params }) {
 
   console.log('film', film);
 
-  const lefTabs = [
-    { id: 1, name: 'Info', active: true,displayActive:true },
-    { id: 2, name: 'Vermouth', active: false,displayActive:false },
-    { id: 3, name: 'Cast', active: false,displayActive:true },
-  ];
+  
 
   return {
     props: {
       film,
-      lefTabs,
     },
   };
 }
