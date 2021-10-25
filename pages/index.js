@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { db } from '../initFirebase';
 import Layout from '../components/Layout';
 import ChipButton from '../components/ChipButton';
+import axios from 'axios';
 
 export default function Home({ films, cities }) {
   const [_movies, setMovies] = useState(
@@ -73,17 +74,32 @@ export async function getStaticProps() {
 
   let films;
   films = moviesResponse.docs.map((m) => ({
-    id: m.id,
+    id_original: m.id,
     ...m.data(),
   }));
 
   //replace poster with url and blur base64
   films = await Promise.all(
     films.map(async (film) => {
-      const { base64, img } = await getPlaiceholder(film.poster);
+      let tempUrl = `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${
+        process.env.NEXT_PUBLIC_TMBD_API_KEY
+      }&language=es-ES&query=${film.name.trim()}&page=1&include_adult=false&year=2021`;
+      const _movie = await axios.get(tempUrl);
+      const movie = _movie.data.results[0];
+      let poster = {
+        URL: 'https://www.sinrumbofijo.com/wp-content/uploads/2016/05/default-placeholder.png',
+        blurDataURL:
+          'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYAAAAAAIQAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGKZAAC3hQAAGNpYWVogAAAAAAAAJKAAAA+EAAC2z3BhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABYWVogAAAAAAAA9tYAAQAAAADTLW1sdWMAAAAAAAAAAQAAAAxlblVTAAAAIAAAABwARwBvAG8AZwBsAGUAIABJAG4AYwAuACAAMgAwADEANv/bAEMAFA4PEg8NFBIQEhcVFBgeMiEeHBwePSwuJDJJQExLR0BGRVBac2JQVW1WRUZkiGVtd3uBgoFOYI2XjH2Wc36BfP/bAEMBFRcXHhoeOyEhO3xTRlN8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fP/AABEIAIIAggMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAAAAQIDBv/EABYQAQEBAAAAAAAAAAAAAAAAAAABEf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9gAqIioAgAKgCqgCiACKgIAAADoCAIJQEEBRDQaE0BoQABAAQAAHVBAKzVqUEQqAaus6aDWrrOqDQyoKIAAgKIA6oqAlZq1mglQqACANCKCqgCgAAAAA6JVQErNarNBmpVqAgACooKqKCiKAIAAA6oqAlZrVZoM1GqgMigCigAoAAIAAADqioCVKqAyKgIKAKKCCgIKgIAAADqioCI0gIioACgAoCKAiKgCKgAAOqAAgAgAAAKAAACIACAAAD//Z',
+      };
+      if (movie) {
+        tempUrl = `${process.env.NEXT_PUBLIC_TMBD_IMAGE_URL}${movie.poster_path}`;
+        const { base64, img } = await getPlaiceholder(tempUrl);
+        poster = { URL: img.src, blurDataURL: base64 };
+      }
       return {
         ...film,
-        poster: { URL: img.src, blurDataURL: base64 },
+        ...movie,
+        poster,
       };
     })
   );
