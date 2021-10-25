@@ -12,7 +12,7 @@ export default function Home({ films, cities }) {
   const [_movies, setMovies] = useState(
     sortMovies(
       films.filter((f) => f.active && f.cities.includes(cities[0].id)),
-      'new'
+      'release_date'
     )
   );
   let _cities = cities.filter((c) => c.active);
@@ -25,7 +25,7 @@ export default function Home({ films, cities }) {
     setMovies(
       sortMovies(
         films.filter((f) => f.active && f.cities.includes(cityId)),
-        'new'
+        'release_date'
       )
     );
   };
@@ -122,4 +122,10 @@ export async function getStaticProps() {
 }
 
 export const sortMovies = (movies, field) =>
-  movies.sort((x, y) => (x[field] === y[field] ? 0 : x[field] ? -1 : 1));
+  movies.sort((x, y) => (x[field] === y[field] ? 0 : x[field] ? 1 : -1));
+
+export const isEstreno = (release_date) => {
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+  return new Date(release_date) >= fourteenDaysAgo;
+};

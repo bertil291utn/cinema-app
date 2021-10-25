@@ -1,6 +1,6 @@
 
 module.exports = {
   images: {
-    domains: ['www.cineplex.com.ec', 'm.media-amazon.com'],
+    domains: ['www.cineplex.com.ec', 'm.media-amazon.com','image.tmdb.org'],
   },
 };
