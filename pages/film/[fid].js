@@ -3,19 +3,23 @@ import { getPlaiceholder } from 'plaiceholder';
 import Layout from '../../components/Layout';
 import { db } from '../../initFirebase';
 import Link from 'next/link';
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 
 import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
+import timeConvert from '../../utils/helpers';
 
-const FilmDetail = ({ film}) => {
+const FilmDetail = ({ film }) => {
   const lefTabs = [
-    { id: 1, name: 'Info', active: true,displayActive:true },
-    { id: 2, name: 'Vermouth', active: false,displayActive:false },
-    { id: 3, name: 'Cast', active: false,displayActive:true },
+    { id: 1, name: 'Info', active: true, displayActive: true },
+    { id: 2, name: 'Vermouth', active: false, displayActive: false },
+    { id: 3, name: 'Cast', active: false, displayActive: true },
   ];
-  const [_leftTabs, setLeftTabs] = useState(lefTabs.filter(t=>t.displayActive));
+  const [_leftTabs, setLeftTabs] = useState(
+    lefTabs.filter((t) => t.displayActive)
+  );
 
   const updateTabs = (tabId) => () => {
     setLeftTabs((pTabs) =>
@@ -53,7 +57,12 @@ const FilmDetail = ({ film}) => {
               <div className='absolute bottom-9 left-9'>
                 <button
                   className='rounded-full p-6 backdrop-filter bg-opacity-10 backdrop-blur-md'
-                  onClick={() => window.open(film.trailer, '_blank')}
+                  onClick={() =>
+                    window.open(
+                      `https://youtu.be/${film.videos.results[0].key}`,
+                      '_blank'
+                    )
+                  }
                 >
                   <IoPlay className='text-white text-3xl' />
                 </button>
@@ -112,17 +121,18 @@ export async function getStaticProps({ params }) {
 
   let film = null;
   if (movieSnap.exists()) {
-    film = { ...movieSnap.data(), id: movieSnap.id };
-    const { base64, img } = await getPlaiceholder(film.poster);
-    film = { ...film, poster: { URL: img.src, blurDataURL: base64 } };
+    film = { ...movieSnap.data(), id_original: movieSnap.id };
+    const { movie, poster } = await buildFilmObject(film.id_tmdb);
+    film = {
+      ...film,
+      ...movie,
+      poster,
+    };
   } else {
     // doc.data() will be undefined in this case
     console.log('No such document!');
   }
-
   console.log('film', film);
-
-  
 
   return {
     props: {
@@ -132,20 +142,25 @@ export async function getStaticProps({ params }) {
 }
 
 export const Info = ({ film }) => {
+  let restriction = film.release_dates.results.find(
+    (e) => e['iso_3166_1'] == 'GB'
+  );
+  if (!restriction) restriction = 0;
+  else restriction = restriction['release_dates'][0].certification;
   return (
     <div className=''>
-      <p className='mb-5 text-3xl font-bold'>{film.name}</p>
+      <p className='mb-5 text-3xl font-bold'>{film.title}</p>
       <div className='contenido text-gray-400'>
-        <div className='flex flex-row'>
+        <div className='flex flex-row flex-wrap'>
           <ul className='flex flex-row'>
-            {film.genre.split(',').map((genre, i) => (
+            {film.genres.map((genre, i) => (
               <li key={`genre-${i}`} className='capitalize mr-3 last:mr-0'>
-                {genre}
+                {genre.name}
               </li>
             ))}
           </ul>
           <p className='mx-4'>&#183;</p>
-          <p className='font-bold'>{film.duration}</p>
+          <p className='font-bold'>{timeConvert(film.runtime)}</p>
         </div>
         <div className='my-2'>
           {film.type.split(',').map((t, i) => (
@@ -162,14 +177,12 @@ export const Info = ({ film }) => {
           <li className='capitalize'>{film.language}</li>
           <li className='mx-4'>&#183;</li>
           <li className='font-bold'>
-            {film.restriction == 0
-              ? 'Todo p\xFAblico'
-              : film.restriction + ' a\xF1os'}
+            {restriction == 0 ? 'Todo p\xFAblico' : restriction + ' a\xF1os'}
           </li>
         </ul>
         <div className='my-5'>
           <ReadMoreReact
-            text={film.plot}
+            text={film.overview}
             readMoreText={'Leer m\xE1s'}
             min={30}
             ideal={40}
@@ -187,4 +200,30 @@ export const Horarios = () => {
 
 export const Cast = () => {
   return <div>this is cast</div>;
+};
+
+const buildFilmObject = async (id_tmdb) => {
+  const movieURL = `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${id_tmdb}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES`;
+  const movieAppendedURL = `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${id_tmdb}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&append_to_response=images,videos,release_dates`;
+  let movie = await axios.get(movieURL);
+  movie = movie.data;
+  let movieAppended = await axios.get(movieAppendedURL);
+  movieAppended = movieAppended.data;
+  movie = {
+    ...movie,
+    images: movieAppended.images,
+    videos: movieAppended.videos,
+    release_dates: movieAppended.release_dates,
+  };
+  let poster = {
+    URL: 'https://www.sinrumbofijo.com/wp-content/uploads/2016/05/default-placeholder.png',
+    blurDataURL:
+      'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYAAAAAAIQAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGKZAAC3hQAAGNpYWVogAAAAAAAAJKAAAA+EAAC2z3BhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABYWVogAAAAAAAA9tYAAQAAAADTLW1sdWMAAAAAAAAAAQAAAAxlblVTAAAAIAAAABwARwBvAG8AZwBsAGUAIABJAG4AYwAuACAAMgAwADEANv/bAEMAFA4PEg8NFBIQEhcVFBgeMiEeHBwePSwuJDJJQExLR0BGRVBac2JQVW1WRUZkiGVtd3uBgoFOYI2XjH2Wc36BfP/bAEMBFRcXHhoeOyEhO3xTRlN8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fP/AABEIAIIAggMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAAAAQIDBv/EABYQAQEBAAAAAAAAAAAAAAAAAAABEf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9gAqIioAgAKgCqgCiACKgIAAADoCAIJQEEBRDQaE0BoQABAAQAAHVBAKzVqUEQqAaus6aDWrrOqDQyoKIAAgKIA6oqAlZq1mglQqACANCKCqgCgAAAAA6JVQErNarNBmpVqAgACooKqKCiKAIAAA6oqAlZrVZoM1GqgMigCigAoAAIAAADqioCVKqAyKgIKAKKCCgIKgIAAADqioCI0gIioACgAoCKAiKgCKgAAOqAAgAgAAAKAAACIACAAAD//Z',
+  };
+  if (movie) {
+    const posterUrl = `${process.env.NEXT_PUBLIC_TMBD_IMAGE_URL}${movie.poster_path}`;
+    const { base64, img } = await getPlaiceholder(posterUrl);
+    poster = { URL: img.src, blurDataURL: base64 };
+  }
+  return { movie, poster };
 };
