@@ -143,6 +143,7 @@ export async function getStaticProps({ params }) {
 
 export const Info = ({ film }) => {
   const sortedBackdrops = film.images.backdrops.slice(0,5);
+  const genres = film.genres.slice(0,2);
   let restriction = film.release_dates.results.find(
     (e) => e['iso_3166_1'] == 'GB'
   );
@@ -154,7 +155,7 @@ export const Info = ({ film }) => {
       <div className='contenido text-gray-400'>
         <div className='flex flex-row flex-wrap'>
           <ul className='flex flex-row'>
-            {film.genres.map((genre, i) => (
+            {genres.map((genre, i) => (
               <li key={`genre-${i}`} className='capitalize mr-3 last:mr-0'>
                 {genre.name}
               </li>
@@ -190,7 +191,7 @@ export const Info = ({ film }) => {
             max={50}
           />
         </div>
-        <div className='my-5 flex overflow-x-auto space-x-8'>
+        <div className='my-5 flex overflow-x-auto space-x-5'>
           {sortedBackdrops.map((backdrop, index) => (
             <div
               className='flex-shrink-0 h-28 w-8/12 relative'
