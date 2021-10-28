@@ -142,6 +142,7 @@ export async function getStaticProps({ params }) {
 }
 
 export const Info = ({ film }) => {
+  const sortedBackdrops = film.images.backdrops.slice(0,5);
   let restriction = film.release_dates.results.find(
     (e) => e['iso_3166_1'] == 'GB'
   );
@@ -189,6 +190,25 @@ export const Info = ({ film }) => {
             max={50}
           />
         </div>
+        <div className='my-5 flex overflow-x-auto space-x-8'>
+          {sortedBackdrops.map((backdrop, index) => (
+            <div
+              className='flex-shrink-0 h-28 w-8/12 relative'
+              key={`image-${index}`}
+            >
+              <Image
+                src={`${process.env.NEXT_PUBLIC_TMBD_IMAGE_URL}${backdrop.file_path}`}
+                alt={`poster-${1}`}
+                layout='fill'
+                objectFit='cover'
+                objectPosition='center'
+                // placeholder='blur'
+                // blurDataURL={film.poster.blurDataURL}
+                className='rounded-3xl'
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -201,6 +221,9 @@ export const Horarios = () => {
 export const Cast = () => {
   return <div>this is cast</div>;
 };
+
+export const sortObject = (array, field) =>
+  array.sort((a, b) => a[field] - b[field]);
 
 const buildFilmObject = async (id_tmdb) => {
   const movieURL = `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${id_tmdb}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES`;
