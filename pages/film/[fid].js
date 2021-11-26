@@ -70,7 +70,7 @@ const FilmDetail = ({ film }) => {
             </div>
           </div>
 
-          <div className='flex flex-row pl-6'>
+          <div className='flex flex-row pl-6 pb-20'>
             <ul className='flex flex-col items-start text-lg'>
               {_leftTabs.map((t) => (
                 <li
@@ -91,6 +91,14 @@ const FilmDetail = ({ film }) => {
               )}
               {_leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
             </div>
+          </div>
+          <div className='pl-24 pr-3 py-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
+            <span
+              // key={`type-${i}`}
+              className='inline-block px-5 py-1 font-bold mr-3 uppercase'
+            >
+              16:31
+            </span>
           </div>
         </>
       ) : (
@@ -142,8 +150,8 @@ export async function getStaticProps({ params }) {
 }
 
 export const Info = ({ film }) => {
-  const sortedBackdrops = film.images.backdrops.slice(0,5);
-  const genres = film.genres.slice(0,2);
+  const sortedBackdrops = film.images.backdrops.slice(0, 5);
+  const genres = film.genres.slice(0, 2);
   let restriction = film.release_dates.results.find(
     (e) => e['iso_3166_1'] == 'GB'
   );
@@ -203,8 +211,8 @@ export const Info = ({ film }) => {
                 layout='fill'
                 objectFit='cover'
                 objectPosition='center'
-                // placeholder='blur'
-                // blurDataURL={film.poster.blurDataURL}
+                placeholder='blur'
+                blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYAAAAAAIQAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGKZAAC3hQAAGNpYWVogAAAAAAAAJKAAAA+EAAC2z3BhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABYWVogAAAAAAAA9tYAAQAAAADTLW1sdWMAAAAAAAAAAQAAAAxlblVTAAAAIAAAABwARwBvAG8AZwBsAGUAIABJAG4AYwAuACAAMgAwADEANv/bAEMAFA4PEg8NFBIQEhcVFBgeMiEeHBwePSwuJDJJQExLR0BGRVBac2JQVW1WRUZkiGVtd3uBgoFOYI2XjH2Wc36BfP/bAEMBFRcXHhoeOyEhO3xTRlN8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fP/AABEIAIIAggMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAAAAQIDBv/EABYQAQEBAAAAAAAAAAAAAAAAAAABEf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9gAqIioAgAKgCqgCiACKgIAAADoCAIJQEEBRDQaE0BoQABAAQAAHVBAKzVqUEQqAaus6aDWrrOqDQyoKIAAgKIA6oqAlZq1mglQqACANCKCqgCgAAAAA6JVQErNarNBmpVqAgACooKqKCiKAIAAA6oqAlZrVZoM1GqgMigCigAoAAIAAADqioCVKqAyKgIKAKKCCgIKgIAAADqioCI0gIioACgAoCKAiKgCKgAAOqAAgAgAAAKAAACIACAAAD//Z'
                 className='rounded-3xl'
               />
             </div>
