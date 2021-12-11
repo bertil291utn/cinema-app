@@ -8,23 +8,17 @@ import ChipButton from '../components/ChipButton';
 import axios from 'axios';
 const cheerio = require('cheerio');
 
-export default function Home({ films, cities }) {
-  const [_movies, setMovies] = useState(films);
+export default function Home({ cityMovies, cities }) {
+  const [cityMovie, setCityMovie] = useState(cityMovies[0]);
   const _cities = cities.map((c, i) => ({
     ...c,
     active: i == 0,
   }));
 
   const selectByCity = (cityId) => {
-    setMovies(
-      sortMovies(
-        films.filter((f) => f.active && f.cities.includes(cityId)),
-        'release_date'
-      )
-    );
+    setCityMovie(cityMovies.find((c) => c.id === cityId));
   };
 
-  //sort by new estrenos
   return (
     <Layout>
       <div className='pt-5 pb-3 px-3 text-center sticky top-0 bg-white z-10 lg:top-16'>
@@ -32,7 +26,7 @@ export default function Home({ films, cities }) {
       </div>
       <main className='container px-3'>
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
-          {_movies.map((movie, i) => (
+          {cityMovie.movies.map((movie, i) => (
             <Link
               href={`/film/${encodeURIComponent(movie.imdbId)}`}
               key={`poster-${i}`}
@@ -65,13 +59,15 @@ export default function Home({ films, cities }) {
 
 export async function getStaticProps() {
   const cities = await getCities();
-  const films = await getMovies(cities[0].url);
+  const cityMovies = await Promise.all(
+    cities.map(async (c) => ({ ...c, movies: await getMovies(c.url) }))
+  );
   console.log(cities);
-  console.log(films);
+  console.log(cityMovies);
 
   return {
     props: {
-      films,
+      cityMovies,
       cities,
     },
   };

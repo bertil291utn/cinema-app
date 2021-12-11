@@ -1,18 +1,11 @@
 import { useState } from 'react';
 
 const ChipButton = ({ onClick, items }) => {
-
   const [_items, setItems] = useState(items);
 
   const selectByItem = (itemId) => () => {
     onClick(itemId);
-    setItems((pItems) =>
-      pItems.map((c) => {
-        c.active = false;
-        if (c.id == itemId) c.active = true;
-        return c;
-      })
-    );
+    setItems((pItems) => pItems.map((c) => ({ ...c, active: c.id == itemId })));
   };
 
   return _items.map((item, i) => (
