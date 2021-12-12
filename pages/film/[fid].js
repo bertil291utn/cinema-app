@@ -270,10 +270,16 @@ async function getMovieById(imdbId) {
       `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/images?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
     );
     imagesByID = imagesByID.data;
+    
+    let videosByID = await axios.get(
+      `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/videos?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
+    );
+    videosByID = videosByID.data;
 
     returnResponse = {
       ...movieByID,
       images: imagesByID,
+      videos:videosByID,
       type: '2D',
       language: 'Espanol',
     };
