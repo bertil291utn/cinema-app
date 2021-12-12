@@ -15,7 +15,7 @@ const FilmDetail = ({ film }) => {
   const lefTabs = [
     { id: 1, name: 'Info', active: true, displayActive: true },
     { id: 2, name: 'Vermouth', active: false, displayActive: false },
-    { id: 3, name: 'Cast', active: false, displayActive: true },
+    { id: 3, name: 'Cast', active: false, displayActive: film?.cast },
   ];
   const [_leftTabs, setLeftTabs] = useState(
     lefTabs.filter((t) => t.displayActive)
@@ -88,7 +88,7 @@ const FilmDetail = ({ film }) => {
                 </li>
               ))}
             </ul>
-            <div className='mt-5 ml-12 mr-8'>
+            <div className='mt-5 ml-12 mr-8 w-full'>
               {_leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
               {_leftTabs.find((t) => t.active).id == 2 && (
                 <Horarios film={film} />
@@ -195,7 +195,7 @@ export const Info = ({ film }) => {
                 key={`image-${index}`}
               >
                 <Image
-                  src={`${imageURL}${backdrop.file_path}`}
+                  src={imageURL + backdrop.file_path}
                   alt={`poster-${1}`}
                   layout='fill'
                   objectFit='cover'
@@ -217,8 +217,27 @@ export const Horarios = () => {
   return <div>this is horarios</div>;
 };
 
-export const Cast = () => {
-  return <div>this is cast</div>;
+export const Cast = ({ film }) => {
+  return (
+    <div className='grid grid-cols-2 gap-3'>
+      {film.cast.map((f) => (
+        <div key={f.id}>
+          <div className='h-48 w-full relative'>
+            <Image
+              src={imageURL + f.profile_path}
+              alt={`actor-${f.id}`}
+              layout='fill'
+              objectFit='cover'
+              placeholder='blur'
+              blurDataURL={rgbDataURL(0, 0, 0)}
+              className='rounded-xl'
+            />
+          </div>
+          <p className='text-gray-400 my-3'>{f.name}</p>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export const sortObject = (array, field) =>
@@ -270,18 +289,24 @@ async function getMovieById(imdbId) {
       `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/images?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
     );
     imagesByID = imagesByID.data;
-    
+
     let videosByID = await axios.get(
       `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/videos?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
     );
     videosByID = videosByID.data;
 
+    let castByID = await axios.get(
+      `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/credits?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
+    );
+    castByID = castByID.data.cast;
+
     returnResponse = {
       ...movieByID,
       images: imagesByID,
-      videos:videosByID,
+      videos: videosByID,
       type: '2D',
       language: 'Espanol',
+      cast: castByID,
     };
   } else {
     const _imdbId = imdbId.replace(/-/g, ' ');
