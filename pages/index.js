@@ -88,7 +88,11 @@ async function getMovies(cityURL) {
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
-      let imdbId = movieName;
+      let imdbId = movieName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
         imdbId = searchedMovie.results.find(
           (m) =>

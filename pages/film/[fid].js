@@ -46,7 +46,11 @@ const FilmDetail = ({ film }) => {
 
             <div className='h-96 w-full relative'>
               <Image
-                src={imageURL + film.poster_path}
+                src={`${
+                  film.poster_path.includes('http')
+                    ? film.poster_path
+                    : imageURL + film.poster_path
+                }`}
                 alt='film-poster'
                 layout='fill'
                 objectFit='cover'
@@ -122,7 +126,6 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  console.log(params.fid);
   const film = await getMovieById(params.fid);
   console.log(film);
   return {
@@ -133,7 +136,7 @@ export async function getStaticProps({ params }) {
 }
 
 export const Info = ({ film }) => {
-  const sortedBackdrops = film.images.backdrops.slice(0, 5);
+  const sortedBackdrops = film.images?.backdrops.slice(0, 5);
   const genres = film.genres.slice(0, 2);
   let restriction = film.release_dates.results.find(
     (e) => e['iso_3166_1'] == 'GB'
@@ -153,7 +156,9 @@ export const Info = ({ film }) => {
             ))}
           </ul>
           <p className='mx-4'>&#183;</p>
-          <p className='font-bold'>{timeConvert(film.runtime)}</p>
+          <p className='font-bold'>
+            {+film.runtime ? timeConvert(film.runtime) : film.runtime.trim()}
+          </p>
         </div>
         <div className='my-2'>
           {film.type.split(',').map((t, i) => (
@@ -182,25 +187,27 @@ export const Info = ({ film }) => {
             max={50}
           />
         </div>
-        <div className='my-5 flex overflow-x-auto space-x-5'>
-          {sortedBackdrops.map((backdrop, index) => (
-            <div
-              className='flex-shrink-0 h-28 w-8/12 relative'
-              key={`image-${index}`}
-            >
-              <Image
-                src={`${imageURL}${backdrop.file_path}`}
-                alt={`poster-${1}`}
-                layout='fill'
-                objectFit='cover'
-                objectPosition='center'
-                placeholder='blur'
-                blurDataURL={rgbDataURL(0, 0, 0)}
-                className='rounded-3xl'
-              />
-            </div>
-          ))}
-        </div>
+        {sortedBackdrops && (
+          <div className='my-5 flex overflow-x-auto space-x-5'>
+            {sortedBackdrops.map((backdrop, index) => (
+              <div
+                className='flex-shrink-0 h-28 w-8/12 relative'
+                key={`image-${index}`}
+              >
+                <Image
+                  src={`${imageURL}${backdrop.file_path}`}
+                  alt={`poster-${1}`}
+                  layout='fill'
+                  objectFit='cover'
+                  objectPosition='center'
+                  placeholder='blur'
+                  blurDataURL={rgbDataURL(0, 0, 0)}
+                  className='rounded-3xl'
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -230,7 +237,11 @@ async function getMovies(cityURL) {
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
-      let imdbId = movieName;
+      let imdbId = movieName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
         imdbId = searchedMovie.results.find(
           (m) =>
@@ -247,37 +258,48 @@ async function getMovies(cityURL) {
 }
 
 async function getMovieById(imdbId) {
-  const _imdbId = +imdbId
+  const _imdbId = +imdbId;
   let returnResponse;
   if (_imdbId) {
-
-    let movieByID = await axios.get(`${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}?api_key=${
-      process.env.NEXT_PUBLIC_TMBD_API_KEY
-      }&language=es-ES&append_to_response=images,videos,release_dates`);
+    let movieByID = await axios.get(
+      `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&append_to_response=images,videos,release_dates`
+    );
     movieByID = movieByID.data;
 
-    let imagesByID = await axios.get(`${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/images?api_key=${
-      process.env.NEXT_PUBLIC_TMBD_API_KEY
-      }`);
+    let imagesByID = await axios.get(
+      `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/images?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}`
+    );
     imagesByID = imagesByID.data;
 
-    returnResponse = { ...movieByID, images: imagesByID, type: '2D' }
-  }
-  else {
-
+    returnResponse = {
+      ...movieByID,
+      images: imagesByID,
+      type: '2D',
+      language: 'Espanol',
+    };
+  } else {
+    const _imdbId = imdbId.replace(/-/g, ' ');
     const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL);
     const $ = cheerio.load(response.data);
     const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
-    const _movies = titles.map((index, section) => {
-      let rawName = $(section).find('h3').text().trim();
-      const movieName = rawName.split('-')[0].trim()
-      const rawURL = $(section).find('a').attr('href');
-      const url = `https://www.cineplex.com.ec/${rawURL}`;
-      const h5Spans = $(section).find('h5 span')
-      const img = $(section).find('img').attr('src');
-      return { movieName, url, h5Spans, img, rawName };
-    }).get()
-    const movieFinded = _movies.find(m => m.movieName.toLowerCase() == imdbId.toLowerCase());
+    const _movies = titles
+      .map((index, section) => {
+        let rawName = $(section).find('h3').text().trim();
+        const movieName = rawName.split('-')[0].trim();
+        const rawURL = $(section).find('a').attr('href');
+        const url = `https://www.cineplex.com.ec/${rawURL}`;
+        const h5Spans = $(section).find('h5 span');
+        const img = $(section).find('img').attr('src');
+        return { movieName, url, h5Spans, img, rawName };
+      })
+      .get();
+    const movieFinded = _movies.find(
+      (m) =>
+        m.movieName
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') == _imdbId.toLowerCase()
+    );
     const response1 = await axios.get(movieFinded.url);
     const $1 = cheerio.load(response1.data);
     let description = $1('div.col.col-sm-9.p-15>h4>span');
@@ -286,30 +308,69 @@ async function getMovieById(imdbId) {
     trailer = trailer.attr('src');
 
     const info = {
-      'release_dates': {
-        results: [{
-          "iso_3166_1": "US",
-          "release_dates": [
-            {
-              "certification": $(movieFinded.h5Spans.get(0)).text()
-            }]
-        }]
+      release_dates: {
+        results: [
+          {
+            iso_3166_1: 'US',
+            release_dates: [
+              {
+                certification: $(movieFinded.h5Spans.get(0)).text(),
+              },
+            ],
+          },
+        ],
       },
 
-      poster_path: movieFinded.img, genres: $(movieFinded.h5Spans.get(2)).text().trim().split('/').map((g, index) => ({ id: index + 1, name: g })), runtime: $(movieFinded.h5Spans.get(3)).text().split(':')[1], overview: description, videos: {
-        results: [{
-          "key": trailer,
-          "type": "Trailer"
-        }]
-      }
-    }
-    returnResponse = { _id: movieFinded.movieName, _new: movieFinded.rawName.includes('ESTRENO'), type: (movieFinded.rawName.split('-')[1].split(' ').filter(e => ['2D', '3D', 'IMAX', '4D', '4K', 'HD', 'ULTRAHD', 'ULTRAIMAX'].includes(e) && e).join('') || '2D').match(/\w?[^estreno]/gi).join('').trim(), language: $(movieFinded.h5Spans.get(1)).text().trim() || 'Espanol', ...info, original_title: movieFinded.movieName }
+      poster_path: movieFinded.img,
+      genres: $(movieFinded.h5Spans.get(2))
+        .text()
+        .trim()
+        .split('/')
+        .map((g, index) => ({ id: index + 1, name: g })),
+      runtime: $(movieFinded.h5Spans.get(3)).text().split(':')[1],
+      overview: description,
+      videos: {
+        results: [
+          {
+            key: trailer,
+            type: 'Trailer',
+          },
+        ],
+      },
+    };
+    returnResponse = {
+      _id: movieFinded.movieName,
+      _new: movieFinded.rawName.includes('ESTRENO'),
+      type: (
+        movieFinded.rawName
+          .split('-')[1]
+          .split(' ')
+          .filter(
+            (e) =>
+              [
+                '2D',
+                '3D',
+                'IMAX',
+                '4D',
+                '4K',
+                'HD',
+                'ULTRAHD',
+                'ULTRAIMAX',
+              ].includes(e) && e
+          )
+          .join('') || '2D'
+      )
+        .match(/\w?[^estreno]/gi)
+        .join('')
+        .trim(),
+      language: $(movieFinded.h5Spans.get(1)).text().trim() || 'Espanol',
+      ...info,
+      original_title: movieFinded.movieName,
+    };
   }
 
   return returnResponse;
-
 }
-
 
 const keyStr =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
