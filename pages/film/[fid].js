@@ -1,7 +1,4 @@
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { getPlaiceholder } from 'plaiceholder';
 import Layout from '../../components/Layout';
-import { db } from '../../initFirebase';
 import Link from 'next/link';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
@@ -10,6 +7,9 @@ import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
 import timeConvert from '../../utils/helpers';
+const cheerio = require('cheerio');
+
+const { NEXT_PUBLIC_TMBD_IMAGE_URL: imageURL } = process.env;
 
 const FilmDetail = ({ film }) => {
   const lefTabs = [
@@ -46,12 +46,12 @@ const FilmDetail = ({ film }) => {
 
             <div className='h-96 w-full relative'>
               <Image
-                src={film.poster.URL}
+                src={imageURL + film.poster_path}
                 alt='film-poster'
                 layout='fill'
                 objectFit='cover'
                 placeholder='blur'
-                blurDataURL={film.poster.blurDataURL}
+                blurDataURL={rgbDataURL(0, 0, 0)}
                 className='rounded-bl-6xl'
               />
               <div className='absolute bottom-9 left-9'>
@@ -111,12 +111,10 @@ const FilmDetail = ({ film }) => {
 export default FilmDetail;
 
 export async function getStaticPaths() {
-  const moviesResponse = await getDocs(collection(db, 'movies'));
-  const filmIds = moviesResponse.docs.map((m) => m.id);
-  const paths = filmIds.map((fid) => ({
-    params: { fid },
+  const _getMovies = await getMovies(process.env.NEXT_PUBLIC_BASE_URL);
+  const paths = _getMovies.map((fid) => ({
+    params: { fid: fid.imdbId + '' },
   }));
-
   return {
     paths,
     fallback: false,
@@ -124,24 +122,9 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const movieRef = doc(db, 'movies', params.fid);
-  const movieSnap = await getDoc(movieRef);
-
-  let film = null;
-  if (movieSnap.exists()) {
-    film = { ...movieSnap.data(), id_original: movieSnap.id };
-    const { movie, poster } = await buildFilmObject(film.id_tmdb);
-    film = {
-      ...film,
-      ...movie,
-      poster,
-    };
-  } else {
-    // doc.data() will be undefined in this case
-    console.log('No such document!');
-  }
-  console.log('film', film);
-
+  console.log(params.fid);
+  const film = await getMovieById(params.fid);
+  console.log(film);
   return {
     props: {
       film,
@@ -206,13 +189,13 @@ export const Info = ({ film }) => {
               key={`image-${index}`}
             >
               <Image
-                src={`${process.env.NEXT_PUBLIC_TMBD_IMAGE_URL}${backdrop.file_path}`}
+                src={`${imageURL}${backdrop.file_path}`}
                 alt={`poster-${1}`}
                 layout='fill'
                 objectFit='cover'
                 objectPosition='center'
                 placeholder='blur'
-                blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYAAAAAAIQAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGKZAAC3hQAAGNpYWVogAAAAAAAAJKAAAA+EAAC2z3BhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABYWVogAAAAAAAA9tYAAQAAAADTLW1sdWMAAAAAAAAAAQAAAAxlblVTAAAAIAAAABwARwBvAG8AZwBsAGUAIABJAG4AYwAuACAAMgAwADEANv/bAEMAFA4PEg8NFBIQEhcVFBgeMiEeHBwePSwuJDJJQExLR0BGRVBac2JQVW1WRUZkiGVtd3uBgoFOYI2XjH2Wc36BfP/bAEMBFRcXHhoeOyEhO3xTRlN8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fP/AABEIAIIAggMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAAAAQIDBv/EABYQAQEBAAAAAAAAAAAAAAAAAAABEf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9gAqIioAgAKgCqgCiACKgIAAADoCAIJQEEBRDQaE0BoQABAAQAAHVBAKzVqUEQqAaus6aDWrrOqDQyoKIAAgKIA6oqAlZq1mglQqACANCKCqgCgAAAAA6JVQErNarNBmpVqAgACooKqKCiKAIAAA6oqAlZrVZoM1GqgMigCigAoAAIAAADqioCVKqAyKgIKAKKCCgIKgIAAADqioCI0gIioACgAoCKAiKgCKgAAOqAAgAgAAAKAAACIACAAAD//Z'
+                blurDataURL={rgbDataURL(0, 0, 0)}
                 className='rounded-3xl'
               />
             </div>
@@ -234,28 +217,110 @@ export const Cast = () => {
 export const sortObject = (array, field) =>
   array.sort((a, b) => a[field] - b[field]);
 
-const buildFilmObject = async (id_tmdb) => {
-  const movieURL = `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${id_tmdb}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES`;
-  const movieAppendedURL = `${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${id_tmdb}?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&append_to_response=images,videos,release_dates`;
-  let movie = await axios.get(movieURL);
-  movie = movie.data;
-  let movieAppended = await axios.get(movieAppendedURL);
-  movieAppended = movieAppended.data;
-  movie = {
-    ...movie,
-    images: movieAppended.images,
-    videos: movieAppended.videos,
-    release_dates: movieAppended.release_dates,
-  };
-  let poster = {
-    URL: 'https://www.sinrumbofijo.com/wp-content/uploads/2016/05/default-placeholder.png',
-    blurDataURL:
-      'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAAAIYAAAAAAIQAABtbnRyUkdCIFhZWiAAAAAAAAAAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAHRyWFlaAAABZAAAABRnWFlaAAABeAAAABRiWFlaAAABjAAAABRyVFJDAAABoAAAAChnVFJDAAABoAAAAChiVFJDAAABoAAAACh3dHB0AAAByAAAABRjcHJ0AAAB3AAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAFgAAAAcAHMAUgBHAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFhZWiAAAAAAAABvogAAOPUAAAOQWFlaIAAAAAAAAGKZAAC3hQAAGNpYWVogAAAAAAAAJKAAAA+EAAC2z3BhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABYWVogAAAAAAAA9tYAAQAAAADTLW1sdWMAAAAAAAAAAQAAAAxlblVTAAAAIAAAABwARwBvAG8AZwBsAGUAIABJAG4AYwAuACAAMgAwADEANv/bAEMAFA4PEg8NFBIQEhcVFBgeMiEeHBwePSwuJDJJQExLR0BGRVBac2JQVW1WRUZkiGVtd3uBgoFOYI2XjH2Wc36BfP/bAEMBFRcXHhoeOyEhO3xTRlN8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fP/AABEIAIIAggMBIgACEQEDEQH/xAAYAAEBAQEBAAAAAAAAAAAAAAAAAQIDBv/EABYQAQEBAAAAAAAAAAAAAAAAAAABEf/EABUBAQEAAAAAAAAAAAAAAAAAAAAB/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A9gAqIioAgAKgCqgCiACKgIAAADoCAIJQEEBRDQaE0BoQABAAQAAHVBAKzVqUEQqAaus6aDWrrOqDQyoKIAAgKIA6oqAlZq1mglQqACANCKCqgCgAAAAA6JVQErNarNBmpVqAgACooKqKCiKAIAAA6oqAlZrVZoM1GqgMigCigAoAAIAAADqioCVKqAyKgIKAKKCCgIKgIAAADqioCI0gIioACgAoCKAiKgCKgAAOqAAgAgAAAKAAACIACAAAD//Z',
-  };
-  if (movie) {
-    const posterUrl = `${process.env.NEXT_PUBLIC_TMBD_IMAGE_URL}${movie.poster_path}`;
-    const { base64, img } = await getPlaiceholder(posterUrl);
-    poster = { URL: img.src, blurDataURL: base64 };
+async function getMovies(cityURL) {
+  const response = await axios.get(cityURL);
+  const $ = cheerio.load(response.data);
+  const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
+  return await Promise.all(
+    titles.map(async (index, section) => {
+      let rawName = $(section).find('h3').text().trim();
+      const movieName = rawName.split('-')[0].trim();
+
+      let searchedMovie = await axios.get(
+        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
+      );
+      searchedMovie = searchedMovie.data;
+      let imdbId = movieName;
+      if (searchedMovie.results.length > 0) {
+        imdbId = searchedMovie.results.find(
+          (m) =>
+            new Date(m.release_date).getFullYear() === new Date().getFullYear()
+        ).id;
+      }
+
+      return {
+        id: index + 1,
+        imdbId,
+      };
+    })
+  );
+}
+
+async function getMovieById(imdbId) {
+  const _imdbId = +imdbId
+  let returnResponse;
+  if (_imdbId) {
+
+    let movieByID = await axios.get(`${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}?api_key=${
+      process.env.NEXT_PUBLIC_TMBD_API_KEY
+      }&language=es-ES&append_to_response=images,videos,release_dates`);
+    movieByID = movieByID.data;
+
+    let imagesByID = await axios.get(`${process.env.NEXT_PUBLIC_TMBD_URL}/movie/${_imdbId}/images?api_key=${
+      process.env.NEXT_PUBLIC_TMBD_API_KEY
+      }`);
+    imagesByID = imagesByID.data;
+
+    returnResponse = { ...movieByID, images: imagesByID, type: '2D' }
   }
-  return { movie, poster };
-};
+  else {
+
+    const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL);
+    const $ = cheerio.load(response.data);
+    const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
+    const _movies = titles.map((index, section) => {
+      let rawName = $(section).find('h3').text().trim();
+      const movieName = rawName.split('-')[0].trim()
+      const rawURL = $(section).find('a').attr('href');
+      const url = `https://www.cineplex.com.ec/${rawURL}`;
+      const h5Spans = $(section).find('h5 span')
+      const img = $(section).find('img').attr('src');
+      return { movieName, url, h5Spans, img, rawName };
+    }).get()
+    const movieFinded = _movies.find(m => m.movieName.toLowerCase() == imdbId.toLowerCase());
+    const response1 = await axios.get(movieFinded.url);
+    const $1 = cheerio.load(response1.data);
+    let description = $1('div.col.col-sm-9.p-15>h4>span');
+    description = description.text();
+    let trailer = $1('iframe');
+    trailer = trailer.attr('src');
+
+    const info = {
+      'release_dates': {
+        results: [{
+          "iso_3166_1": "US",
+          "release_dates": [
+            {
+              "certification": $(movieFinded.h5Spans.get(0)).text()
+            }]
+        }]
+      },
+
+      poster_path: movieFinded.img, genres: $(movieFinded.h5Spans.get(2)).text().trim().split('/').map((g, index) => ({ id: index + 1, name: g })), runtime: $(movieFinded.h5Spans.get(3)).text().split(':')[1], overview: description, videos: {
+        results: [{
+          "key": trailer,
+          "type": "Trailer"
+        }]
+      }
+    }
+    returnResponse = { _id: movieFinded.movieName, _new: movieFinded.rawName.includes('ESTRENO'), type: (movieFinded.rawName.split('-')[1].split(' ').filter(e => ['2D', '3D', 'IMAX', '4D', '4K', 'HD', 'ULTRAHD', 'ULTRAIMAX'].includes(e) && e).join('') || '2D').match(/\w?[^estreno]/gi).join('').trim(), language: $(movieFinded.h5Spans.get(1)).text().trim() || 'Espanol', ...info, original_title: movieFinded.movieName }
+  }
+
+  return returnResponse;
+
+}
+
+
+const keyStr =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+const triplet = (e1, e2, e3) =>
+  keyStr.charAt(e1 >> 2) +
+  keyStr.charAt(((e1 & 3) << 4) | (e2 >> 4)) +
+  keyStr.charAt(((e2 & 15) << 2) | (e3 >> 6)) +
+  keyStr.charAt(e3 & 63);
+
+const rgbDataURL = (r, g, b) =>
+  `data:image/gif;base64,R0lGODlhAQABAPAA${
+    triplet(0, r, g) + triplet(b, 255, 255)
+  }/yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==`;

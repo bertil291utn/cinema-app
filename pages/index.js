@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import { useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
-import { db } from '../initFirebase';
 import Layout from '../components/Layout';
 import ChipButton from '../components/ChipButton';
 import axios from 'axios';
@@ -85,15 +83,17 @@ async function getMovies(cityURL) {
       let rawName = $(section).find('h3').text().trim();
       const movieName = rawName.split('-')[0].trim();
       const img = $(section).find('img').attr('src');
-      const h5Spans = $(section).find('h5 span');
 
       let searchedMovie = await axios.get(
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
-      let imdbId = index + 1;
+      let imdbId = movieName;
       if (searchedMovie.results.length > 0) {
-        imdbId = searchedMovie.results[0].id;
+        imdbId = searchedMovie.results.find(
+          (m) =>
+            new Date(m.release_date).getFullYear() === new Date().getFullYear()
+        ).id;
       }
 
       return {
@@ -101,11 +101,6 @@ async function getMovies(cityURL) {
         imdbId,
         name: movieName,
         _new: rawName.includes('ESTRENO'),
-        type: (rawName.split('-')[1] || '2D')
-          .match(/\w?[^estreno]/gi)
-          .join('')
-          .trim(),
-        language: $(h5Spans.get(1)).text().trim() || 'Espanol',
         poster_path: img,
       };
     })
