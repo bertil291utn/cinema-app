@@ -116,17 +116,22 @@ export default FilmDetail;
 
 export async function getStaticPaths() {
   const _getMovies = await getMovies(process.env.NEXT_PUBLIC_BASE_URL);
-  const paths = _getMovies.map((fid) => ({
-    params: { fid: fid.imdbId + '' },
-  }));
+  const paths = _getMovies.map((fid) => fid.imdbId);
+  const respArray = [];
+  const cities = await getCities();
+  paths.forEach((p) => {
+    cities.forEach((c) => {
+      respArray.push({ params: { slug: [p, c.id + ''] } });
+    });
+  });
   return {
-    paths,
+    paths: respArray,
     fallback: false,
   };
 }
 
 export async function getStaticProps({ params }) {
-  const film = await getMovieById(params.fid);
+  const film = await getMovieById(params.slug[0], params.slug[1]);
   console.log(film);
   return {
     props: {
@@ -262,21 +267,24 @@ async function getMovies(cityURL) {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
-        imdbId = searchedMovie.results.find(
-          (m) =>
-            new Date(m.release_date).getFullYear() === new Date().getFullYear()
-        ).id;
+        imdbId =
+          searchedMovie.results.find(
+            (m) =>
+              new Date(m.release_date).getFullYear() ===
+              new Date().getFullYear()
+          ).id + '';
       }
 
       return {
         id: index + 1,
         imdbId,
+        name: movieName,
       };
     })
   );
 }
 
-async function getMovieById(imdbId) {
+async function getMovieById(imdbId, cityId) {
   const _imdbId = +imdbId;
   let returnResponse;
   if (_imdbId) {
@@ -399,8 +407,79 @@ async function getMovieById(imdbId) {
       original_title: movieFinded.movieName,
     };
   }
+  const cities = await getCities();
+  const moviesFind = await getMovies(process.env.NEXT_PUBLIC_BASE_URL);
+
+  returnResponse = {
+    ...returnResponse,
+    showTime: await getShowTime(
+      cities.find((c) => c.id == cityId).url,
+      moviesFind.find((m) => m.imdbId == imdbId).name
+    ),
+  };
 
   return returnResponse;
+}
+
+async function getCities() {
+  const response = await axios.get(process.env.NEXT_PUBLIC_BASE_URL);
+  const $ = cheerio.load(response.data);
+
+  const citiesHTML = $('.cta-wr .col-md-3');
+  return citiesHTML
+    .map((index, section) => {
+      const rawName = $(section).find('span').text().trim();
+      const rawURL = $(section).find('a').attr('href');
+
+      return {
+        id: index + 1,
+        name: rawName.replace('Cineplex ', ''),
+        url: rawURL,
+      };
+    })
+    .get();
+}
+
+async function getShowTime(cityURL, movieName) {
+  const response = await axios.get(cityURL);
+  const $ = cheerio.load(response.data);
+  const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
+  const showTime = titles
+    .map((index, section) => {
+      const rawPriceLanguage = $(section).find('h5 span').text().trim();
+      const rawName = $(section).find('h3').text().trim();
+      let rawShowtime = $(section).find('span span').text().trim();
+      rawShowtime = rawShowtime.split('VERMOUTH');
+
+      let vermouth = rawShowtime[1] || false;
+      const regularCondition = rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi);
+      let regular = regularCondition || false;
+      if (rawShowtime[1]) {
+        vermouth = {
+          _showtime: [
+            ...(rawShowtime[1].match(/[0-9]{2}:[0-9]{2}/gi) ||
+              rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi)),
+          ],
+          price: rawShowtime[1].match(/[0-9]\.[0-9]/gi).join(''),
+          days: rawShowtime[1].match(/SAB|DOM|LUN|MAR|MIE|JUE|VIE/gi),
+        };
+      }
+
+      if (regularCondition) {
+        regular = {
+          _showtime: [...rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi)],
+          price: rawPriceLanguage.match(/[0-9]\.[0-9]+/gi).join(''),
+        };
+      }
+
+      return { name: rawName.split('-')[0].trim(), regular, vermouth };
+    })
+    .get();
+
+  return (
+    showTime.find((st) => st.name.toLowerCase() == movieName.toLowerCase()) ||
+    {}
+  );
 }
 
 const keyStr =

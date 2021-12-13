@@ -8,12 +8,14 @@ const cheerio = require('cheerio');
 
 export default function Home({ cityMovies, cities }) {
   const [cityMovie, setCityMovie] = useState(cityMovies[0]);
+  const [cityId, setCityId] = useState(1);
   const _cities = cities.map((c, i) => ({
     ...c,
     active: i == 0,
   }));
 
   const selectByCity = (cityId) => {
+    setCityId(cityId)
     setCityMovie(cityMovies.find((c) => c.id === cityId));
   };
 
@@ -26,7 +28,7 @@ export default function Home({ cityMovies, cities }) {
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
           {cityMovie.movies.map((movie, i) => (
             <Link
-              href={`/film/${encodeURIComponent(movie.imdbId)}`}
+              href={`/film/${encodeURIComponent(movie.imdbId)}/${encodeURIComponent(cityId)}`}
               key={`poster-${i}`}
             >
               <a>
@@ -60,8 +62,6 @@ export async function getStaticProps() {
   const cityMovies = await Promise.all(
     cities.map(async (c) => ({ ...c, movies: await getMovies(c.url) }))
   );
-  console.log(cities);
-  console.log(cityMovies);
 
   return {
     props: {
