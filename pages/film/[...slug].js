@@ -23,11 +23,10 @@ const FilmDetail = ({ film }) => {
 
   const updateTabs = (tabId) => () => {
     setLeftTabs((pTabs) =>
-      pTabs.map((t) => {
-        t.active = false;
-        if (t.id == tabId) t.active = true;
-        return t;
-      })
+      pTabs.map((t) => ({
+        ...t,
+        active: t.id == tabId,
+      }))
     );
   };
 
@@ -261,17 +260,17 @@ async function getMovies(cityURL) {
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
-      
+
       let searchedMovie = await axios.get(
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
       let imdbId = movieName.replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
-        imdbId = searchedMovie.results.find(
-          (m) =>
-            new Date(m.release_date).getFullYear() >=2020
-        ).id+ '';
+        imdbId =
+          searchedMovie.results.find(
+            (m) => new Date(m.release_date).getFullYear() >= 2020
+          ).id + '';
       }
 
       return {
