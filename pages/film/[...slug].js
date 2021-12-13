@@ -255,30 +255,29 @@ async function getMovies(cityURL) {
   return await Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      const movieName = rawName.split('-')[0].trim();
-
+      const movieNameOriginal = rawName.split('-')[0].trim();
+      let movieName = movieNameOriginal;
+      movieName = movieName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      
       let searchedMovie = await axios.get(
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
-      let imdbId = movieName
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s/g, '-');
+      let imdbId = movieName.replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
-        imdbId =
-          searchedMovie.results.find(
-            (m) =>
-              new Date(m.release_date).getFullYear() ===
-              new Date().getFullYear()
-          ).id + '';
+        imdbId = searchedMovie.results.find(
+          (m) =>
+            new Date(m.release_date).getFullYear() >=2020
+        ).id+ '';
       }
 
       return {
         id: index + 1,
         imdbId,
-        name: movieName,
+        name: movieNameOriginal,
       };
     })
   );

@@ -15,7 +15,7 @@ export default function Home({ cityMovies, cities }) {
   }));
 
   const selectByCity = (cityId) => {
-    setCityId(cityId)
+    setCityId(cityId);
     setCityMovie(cityMovies.find((c) => c.id === cityId));
   };
 
@@ -28,7 +28,9 @@ export default function Home({ cityMovies, cities }) {
         <div className='my-5 text-center grid grid-cols-2 gap-3'>
           {cityMovie.movies.map((movie, i) => (
             <Link
-              href={`/film/${encodeURIComponent(movie.imdbId)}/${encodeURIComponent(cityId)}`}
+              href={`/film/${encodeURIComponent(
+                movie.imdbId
+              )}/${encodeURIComponent(cityId)}`}
               key={`poster-${i}`}
             >
               <a>
@@ -78,32 +80,33 @@ async function getMovies(cityURL) {
   const response = await axios.get(cityURL);
   const $ = cheerio.load(response.data);
   const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
-  return await Promise.all(
+  return Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      const movieName = rawName.split('-')[0].trim();
+      const movieNameOriginal = rawName.split('-')[0].trim();
+      let movieName = movieNameOriginal;
+      movieName = movieName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
       const img = $(section).find('img').attr('src');
 
       let searchedMovie = await axios.get(
         `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
-      let imdbId = movieName
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s/g, '-');
+      let imdbId = movieName.replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
         imdbId = searchedMovie.results.find(
           (m) =>
-            new Date(m.release_date).getFullYear() === new Date().getFullYear()
+            new Date(m.release_date).getFullYear() >=2020
         ).id;
       }
 
       return {
         id: index + 1,
         imdbId,
-        name: movieName,
+        name: movieNameOriginal,
         _new: rawName.includes('ESTRENO'),
         poster_path: img,
       };
