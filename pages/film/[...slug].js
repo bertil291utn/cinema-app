@@ -130,7 +130,8 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const film = await getMovieById(params.slug[0], params.slug[1]);
+  const [imdbId, cityId] = params.slug;
+  const film = await getMovieById(imdbId, cityId);
   console.log(film);
   return {
     props: {
