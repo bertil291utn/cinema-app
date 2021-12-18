@@ -2,16 +2,19 @@ import Layout from '../../components/Layout';
 import Link from 'next/link';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router'
 
 import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
 import timeConvert from '../../utils/helpers';
+import _ from 'lodash';
 const cheerio = require('cheerio');
 
 const { NEXT_PUBLIC_TMBD_IMAGE_URL: imageURL } = process.env;
 
 const FilmDetail = ({ film }) => {
+    const router = useRouter()
   const lefTabs = [
     { id: 1, name: 'Info', active: true, displayActive: true },
     { id: 2, name: 'Vermouth', active: false, displayActive: false },
@@ -35,12 +38,8 @@ const FilmDetail = ({ film }) => {
       {film ? (
         <>
           <div className='flex flex-row pl-6'>
-            <div className='mr-10 mt-10 h-10'>
-              <Link href='/'>
-                <a>
-                  <IoChevronBackOutline className='text-3xl' />
-                </a>
-              </Link>
+            <div className='mr-10 mt-10 h-10' onClick={() => router.back()}>
+                <IoChevronBackOutline className='text-3xl' />
             </div>
 
             <div className='h-96 w-full relative'>
@@ -114,10 +113,10 @@ const FilmDetail = ({ film }) => {
 export default FilmDetail;
 
 export async function getStaticPaths() {
-  const _getMovies = await getMovies(process.env.NEXT_PUBLIC_BASE_URL);
+  const cities = await getCities();
+  const _getMovies = await getAllMovies(cities);
   const paths = _getMovies.map((fid) => fid.imdbId);
   const respArray = [];
-  const cities = await getCities();
   paths.forEach((p) => {
     cities.forEach((c) => {
       respArray.push({ params: { slug: [p, c.id + ''] } });
@@ -255,7 +254,9 @@ async function getMovies(cityURL) {
   return await Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      const movieNameOriginal = rawName.split('-')[0].trim();
+      const movieNameOriginal = rawName
+        .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
+        .trim();
       let movieName = movieNameOriginal;
       movieName = movieName
         .toLowerCase()
@@ -407,7 +408,7 @@ async function getMovieById(imdbId, cityId) {
     };
   }
   const cities = await getCities();
-  const moviesFind = await getMovies(process.env.NEXT_PUBLIC_BASE_URL);
+  const moviesFind = await getAllMovies(cities);
 
   returnResponse = {
     ...returnResponse,
@@ -494,3 +495,11 @@ const rgbDataURL = (r, g, b) =>
   `data:image/gif;base64,R0lGODlhAQABAPAA${
     triplet(0, r, g) + triplet(b, 255, 255)
   }/yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==`;
+
+async function getAllMovies(cities) {
+  const cityMovies = await Promise.all(
+    cities.map(async (c) => ({ ...c, movies: await getMovies(c.url) }))
+  );
+  const cm = cityMovies.map((cm) => cm.movies);
+  return _.uniqBy(cm.flat(), 'name');
+}

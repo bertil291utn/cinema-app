@@ -83,7 +83,7 @@ async function getMovies(cityURL) {
   return Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      const movieNameOriginal = rawName.split('-')[0].trim();
+      const movieNameOriginal = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim()
       let movieName = movieNameOriginal;
       movieName = movieName
         .toLowerCase()
