@@ -77,7 +77,7 @@ const FilmDetail = ({ film }) => {
             </div>
           </div>
 
-          <div className='flex flex-row pl-6 pb-20'>
+          <div className='flex flex-row pl-6 pb-36'>
             <ul className='flex flex-col items-start text-lg'>
               {_leftTabs.map((t) => (
                 <li
@@ -99,8 +99,8 @@ const FilmDetail = ({ film }) => {
               {_leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
             </div>
           </div>
-          <div className='pr-3 py-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
-            <div className='ml-24  flex overflow-x-auto space-x-5'>
+          <div className='pt-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
+            <div className='ml-24 flex overflow-x-auto space-x-5 mb-5 mr-3'>
               {film.showTime.regular._showtime.map((st, i) => (
                 <span
                   key={`type-${i}`}
@@ -109,6 +109,17 @@ const FilmDetail = ({ film }) => {
                   {st}
                 </span>
               ))}
+            </div>
+            <div className='flex justify-between items-center ml-10'>
+              <p className='text-2xl font-bold'>
+                {`$${film.showTime.regular.price}`}
+              </p>
+              <button
+                className='bg-blue-600 rounded-tl-4xl w-1/2 font-bold py-7 text-white text-center text-2xl'
+                type='button'
+              >
+                Buy
+              </button>
             </div>
           </div>
         </>
