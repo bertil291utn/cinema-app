@@ -99,13 +99,17 @@ const FilmDetail = ({ film }) => {
               {_leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
             </div>
           </div>
-          <div className='pl-24 pr-3 py-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
-            <span
-              // key={`type-${i}`}
-              className='inline-block px-5 py-1 font-bold mr-3 uppercase'
-            >
-              16:31
-            </span>
+          <div className='pr-3 py-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
+            <div className='ml-24  flex overflow-x-auto space-x-5'>
+              {film.showTime.regular._showtime.map((st, i) => (
+                <span
+                  key={`type-${i}`}
+                  className='p-1 font-bold mr-1 uppercase'
+                >
+                  {st}
+                </span>
+              ))}
+            </div>
           </div>
         </>
       ) : (
@@ -262,7 +266,7 @@ async function getMovies(cityURL) {
       let movieNameOriginal = rawName
         .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
         .trim();
-    movieNameOriginal=movieNameOriginal.replace(/\W/g,' ').trim();
+      movieNameOriginal = movieNameOriginal.replace(/\W/g, ' ').trim();
       let movieName = movieNameOriginal;
       movieName = movieName
         .toLowerCase()
@@ -330,8 +334,10 @@ async function getMovieById(imdbId, cityId) {
     const _movies = titles
       .map((index, section) => {
         let rawName = $(section).find('h3').text().trim();
-        let movieName = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim();
-    movieName=movieName.replace(/\W/g,' ').trim();
+        let movieName = rawName
+          .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
+          .trim();
+        movieName = movieName.replace(/\W/g, ' ').trim();
         const rawURL = $(section).find('a').attr('href');
         const url = `https://www.cineplex.com.ec/${rawURL}`;
         const h5Spans = $(section).find('h5 span');
@@ -456,8 +462,10 @@ async function getShowTime(cityURL, movieName) {
       const h5 = $(section).find('h5');
       let showTime = $(section).find('span span[style="font-size: 20px;"]');
       const rawName = $(section).find('h3').text().trim();
-       let _movieName = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim();
-    _movieName=_movieName.replace(/\W/g,' ').trim();
+      let _movieName = rawName
+        .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
+        .trim();
+      _movieName = _movieName.replace(/\W/g, ' ').trim();
 
       const regularPrice = $(h5.get(1)).find('span').text();
       const regularShowTime = $(showTime.get(0)).text();
