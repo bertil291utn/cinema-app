@@ -2,7 +2,7 @@ import Layout from '../../components/Layout';
 import Link from 'next/link';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/router';
 
 import { IoChevronBackOutline, IoPlay } from 'react-icons/io5';
 import Image from 'next/image';
@@ -14,10 +14,15 @@ const cheerio = require('cheerio');
 const { NEXT_PUBLIC_TMBD_IMAGE_URL: imageURL } = process.env;
 
 const FilmDetail = ({ film }) => {
-    const router = useRouter()
+  const router = useRouter();
   const lefTabs = [
     { id: 1, name: 'Info', active: true, displayActive: true },
-    { id: 2, name: 'Vermouth', active: false, displayActive: false },
+    {
+      id: 2,
+      name: 'Vermouth',
+      active: false,
+      displayActive: film.showTime?.vermouth,
+    },
     { id: 3, name: 'Cast', active: false, displayActive: film?.cast },
   ];
   const [_leftTabs, setLeftTabs] = useState(
@@ -39,7 +44,7 @@ const FilmDetail = ({ film }) => {
         <>
           <div className='flex flex-row pl-6'>
             <div className='mr-10 mt-10 h-10' onClick={() => router.back()}>
-                <IoChevronBackOutline className='text-3xl' />
+              <IoChevronBackOutline className='text-3xl' />
             </div>
 
             <div className='h-96 w-full relative'>
@@ -218,7 +223,7 @@ export const Info = ({ film }) => {
 };
 
 export const Horarios = () => {
-  return <div>this is horarios</div>;
+  return <div>horarios vermouth</div>;
 };
 
 export const Cast = ({ film }) => {
@@ -254,9 +259,10 @@ async function getMovies(cityURL) {
   return await Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      const movieNameOriginal = rawName
+      let movieNameOriginal = rawName
         .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
         .trim();
+    movieNameOriginal=movieNameOriginal.replace(/\W/g,' ').trim();
       let movieName = movieNameOriginal;
       movieName = movieName
         .toLowerCase()
@@ -324,7 +330,8 @@ async function getMovieById(imdbId, cityId) {
     const _movies = titles
       .map((index, section) => {
         let rawName = $(section).find('h3').text().trim();
-        const movieName = rawName.split('-')[0].trim();
+        let movieName = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim();
+    movieName=movieName.replace(/\W/g,' ').trim();
         const rawURL = $(section).find('a').attr('href');
         const url = `https://www.cineplex.com.ec/${rawURL}`;
         const h5Spans = $(section).find('h5 span');
@@ -443,36 +450,42 @@ async function getCities() {
 async function getShowTime(cityURL, movieName) {
   const response = await axios.get(cityURL);
   const $ = cheerio.load(response.data);
-  const titles = $('div .col-md-4.col-sm-4.col-lg-4.col-xs-12');
+  const titles = $('div.col-md-4.col-sm-4.col-lg-4.col-xs-12');
   const showTime = titles
     .map((index, section) => {
-      const rawPriceLanguage = $(section).find('h5 span').text().trim();
+      const h5 = $(section).find('h5');
+      let showTime = $(section).find('span span[style="font-size: 20px;"]');
       const rawName = $(section).find('h3').text().trim();
-      let rawShowtime = $(section).find('span span').text().trim();
-      rawShowtime = rawShowtime.split('VERMOUTH');
+       let _movieName = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim();
+    _movieName=_movieName.replace(/\W/g,' ').trim();
 
-      let vermouth = rawShowtime[1] || false;
-      const regularCondition = rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi);
-      let regular = regularCondition || false;
-      if (rawShowtime[1]) {
+      const regularPrice = $(h5.get(1)).find('span').text();
+      const regularShowTime = $(showTime.get(0)).text();
+      const vermouthShowTime = $(showTime.get(1)).text();
+      const vermouthPriceDate = $(h5.get(2)).find('span').text();
+
+      let vermouth = vermouthPriceDate;
+      let regular = regularPrice;
+      if (vermouth) {
         vermouth = {
-          _showtime: [
-            ...(rawShowtime[1].match(/[0-9]{2}:[0-9]{2}/gi) ||
-              rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi)),
-          ],
-          price: rawShowtime[1].match(/[0-9]\.[0-9]/gi).join(''),
-          days: rawShowtime[1].match(/SAB|DOM|LUN|MAR|MIE|JUE|VIE/gi),
+          _showtime: [...vermouthShowTime.match(/[0-9]{2}:[0-9]{2}/gi)],
+          price: vermouthPriceDate.match(/[0-9]\.[0-9]+/gi).join(''),
+          days: vermouthPriceDate.match(/SAB|DOM|LUN|MAR|MIE|JUE|VIE/gi),
         };
       }
 
-      if (regularCondition) {
+      if (regular) {
         regular = {
-          _showtime: [...rawShowtime[0].match(/[0-9]{2}:[0-9]{2}/gi)],
-          price: rawPriceLanguage.match(/[0-9]\.[0-9]+/gi).join(''),
+          _showtime: [...regularShowTime.match(/[0-9]{2}:[0-9]{2}/gi)],
+          price: regularPrice.match(/[0-9]\.[0-9]+/gi).join(''),
         };
       }
 
-      return { name: rawName.split('-')[0].trim(), regular, vermouth };
+      return {
+        name: _movieName,
+        regular,
+        vermouth,
+      };
     })
     .get();
 
