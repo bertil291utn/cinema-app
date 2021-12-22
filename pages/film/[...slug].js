@@ -115,6 +115,7 @@ const FilmDetail = ({ film }) => {
                 {`$${film.showTime.regular.price}`}
               </p>
               <button
+                onClick={() => window.open(`tel:${film.showTime.telephone}`)}
                 className='bg-blue-600 rounded-tl-4xl w-1/2 font-bold py-7 text-white text-center text-2xl'
                 type='button'
               >
@@ -509,8 +510,12 @@ async function getShowTime(cityURL, movieName) {
     .get();
 
   return (
-    showTime.find((st) => st.name.toLowerCase() == movieName.toLowerCase()) ||
-    {}
+    {
+      ...showTime.find(
+        (st) => st.name.toLowerCase() == movieName.toLowerCase()
+      ),
+      telephone: await getTelephone(cityURL),
+    } || {}
   );
 }
 
@@ -534,4 +539,14 @@ async function getAllMovies(cities) {
   );
   const cm = cityMovies.map((cm) => cm.movies);
   return _.uniqBy(cm.flat(), 'name');
+}
+
+async function getTelephone(cityURL) {
+  const response = await axios.get(cityURL);
+  const $ = cheerio.load(response.data);
+  const footer = $('footer li');
+  return $(footer.get(1))
+    .text()
+    .match(/[\+]?[(]?[0-9]{2}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}/g)
+    .join('');
 }
