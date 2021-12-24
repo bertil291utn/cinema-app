@@ -8,12 +8,4 @@ module.exports = {
       'www.sinrumbofijo.com',
     ],
   },
-  // webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-  //   // Important: return the modified config
-  //   config.externals =
-  //     {
-  //       sharp: 'sharp',
-  //     } || [];
-  //   return config;
-  // },
 };

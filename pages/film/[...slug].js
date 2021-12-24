@@ -119,7 +119,7 @@ const FilmDetail = ({ film }) => {
                 className='bg-blue-600 rounded-tl-4xl w-1/2 font-bold py-7 text-white text-center text-2xl'
                 type='button'
               >
-                Buy
+                Comprar
               </button>
             </div>
           </div>
@@ -238,8 +238,20 @@ export const Info = ({ film }) => {
   );
 };
 
-export const Horarios = () => {
-  return <div>horarios vermouth</div>;
+export const Horarios = ({ film }) => {
+  return (
+    <>
+      <div className='d-flex overflow-x-auto space-x-5 my-4'>
+        {film.showTime.vermouth._showtime.map((st, i) => (
+          <span key={`type-${i}`} className='p-1 font-bold mr-1 uppercase'>
+            {st}
+          </span>
+        ))}
+      </div>
+      <p className='text-gray-400'>{film.showTime.vermouth.days.join(' / ')}</p>
+      <p className='text-2xl font-bold'>{`$${film.showTime.vermouth.price}`}</p>
+    </>
+  );
 };
 
 export const Cast = ({ film }) => {
@@ -479,13 +491,13 @@ async function getShowTime(cityURL, movieName) {
         .trim();
       _movieName = _movieName.replace(/\W/g, ' ').trim();
 
-      const regularPrice = $(h5.get(1)).find('span').text();
-      const regularShowTime = $(showTime.get(0)).text();
-      const vermouthShowTime = $(showTime.get(1)).text();
-      const vermouthPriceDate = $(h5.get(2)).find('span').text();
+      const regularPrice = $(h5.get(1)).find('span').text().trim();
+      const regularShowTime = $(showTime.get(0)).text().trim();
+      const vermouthShowTime = $(showTime.get(1)).text().trim();
+      const vermouthPriceDate = $(h5.get(2)).find('span').text().trim();
 
       let vermouth = vermouthPriceDate;
-      let regular = regularPrice;
+      let regular = regularShowTime;
       if (vermouth) {
         vermouth = {
           _showtime: [...vermouthShowTime.match(/[0-9]{2}:[0-9]{2}/gi)],
