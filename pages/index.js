@@ -83,8 +83,10 @@ async function getMovies(cityURL) {
   return Promise.all(
     titles.map(async (index, section) => {
       let rawName = $(section).find('h3').text().trim();
-      let movieNameOriginal = rawName.split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0].trim()
-      movieNameOriginal=movieNameOriginal.replace(/\W/g,' ').trim();
+      let movieNameOriginal = rawName
+        .split(/2D|3D|IMAX|4D|4K|HD|ULTRAHD|ULTRAIMAX/gi)[0]
+        .trim();
+      movieNameOriginal = movieNameOriginal.replace(/\W/g, ' ').trim();
       let movieName = movieNameOriginal;
       movieName = movieName
         .toLowerCase()
@@ -93,14 +95,17 @@ async function getMovies(cityURL) {
       const img = $(section).find('img').attr('src');
 
       let searchedMovie = await axios.get(
-        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
+        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${
+          process.env.NEXT_PUBLIC_TMBD_API_KEY
+        }&language=es-ES&query=${
+          movieName.split(' ')[0]
+        }&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
       let imdbId = movieName.replace(/\s/g, '-');
       if (searchedMovie.results.length > 0) {
         imdbId = searchedMovie.results.find(
-          (m) =>
-            new Date(m.release_date).getFullYear() >=2020
+          (m) => new Date(m.release_date).getFullYear() >= 2020
         ).id;
       }
 

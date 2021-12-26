@@ -1,9 +1,8 @@
 import CinemaProvider from '../context';
 import Head from 'next/head';
 
-
 import '../styles/globals.css';
-import './home.css';
+import '../styles/home.css';
 
 
 function MyApp({ Component, pageProps }) {

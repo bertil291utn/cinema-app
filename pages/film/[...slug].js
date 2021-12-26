@@ -15,6 +15,7 @@ const { NEXT_PUBLIC_TMBD_IMAGE_URL: imageURL } = process.env;
 
 const FilmDetail = ({ film }) => {
   const router = useRouter();
+  console.log('router.query',router.query)
   const lefTabs = [
     { id: 1, name: 'Info', active: true, displayActive: true },
     {
@@ -135,14 +136,17 @@ export default FilmDetail;
 
 export async function getStaticPaths() {
   const cities = await getCities();
-  const _getMovies = await getAllMovies(cities);
-  const paths = _getMovies.map((fid) => fid.imdbId);
-  const respArray = [];
-  paths.forEach((p) => {
-    cities.forEach((c) => {
-      respArray.push({ params: { slug: [p, c.id + ''] } });
+  const citiesMovies = await Promise.all(
+    cities.map(async (c) => ({ ...c, movies: await getMovies(c.url) }))
+  );
+  let respArray = [];
+  citiesMovies.forEach((cm) => {
+    cm.movies.flat().forEach((m) => {
+      respArray.push({ params: { slug: [m.imdbId + '', cm.id + ''] } });
     });
   });
+
+  console.log(respArray)
   return {
     paths: respArray,
     fallback: false,
@@ -298,7 +302,11 @@ async function getMovies(cityURL) {
         .replace(/[\u0300-\u036f]/g, '');
 
       let searchedMovie = await axios.get(
-        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
+        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${
+          process.env.NEXT_PUBLIC_TMBD_API_KEY
+        }&language=es-ES&query=${
+          movieName.split(' ')[0]
+        }&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
       let imdbId = movieName.replace(/\s/g, '-');
