@@ -65,7 +65,7 @@ const FilmDetail = () => {
       {film ? (
         <>
           <div className='flex flex-row pl-6'>
-            <div className='mr-10 mt-10 h-10' onClick={() => router.back()}>
+            <div className='mr-10 mt-10 h-10' onClick={() => router.push('/')}>
               <IoChevronBackOutline className='text-3xl' />
             </div>
 
