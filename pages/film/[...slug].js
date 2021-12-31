@@ -9,26 +9,48 @@ import Image from 'next/image';
 import ReadMoreReact from 'read-more-react';
 import timeConvert from '../../utils/helpers';
 import _ from 'lodash';
+import SpinnerLoader from '../../components/Spinner-loader';
 const cheerio = require('cheerio');
 
 const { NEXT_PUBLIC_TMBD_IMAGE_URL: imageURL } = process.env;
 
-const FilmDetail = ({ film }) => {
+const FilmDetail = () => {
   const router = useRouter();
-  console.log('router.query',router.query)
-  const lefTabs = [
+  const [film, setFilm] = useState(undefined);
+
+  const _leftTabs = [
     { id: 1, name: 'Info', active: true, displayActive: true },
     {
       id: 2,
       name: 'Vermouth',
       active: false,
-      displayActive: film.showTime?.vermouth,
+      displayActive: false,
     },
-    { id: 3, name: 'Cast', active: false, displayActive: film?.cast },
+    { id: 3, name: 'Cast', active: false, displayActive: false },
   ];
-  const [_leftTabs, setLeftTabs] = useState(
-    lefTabs.filter((t) => t.displayActive)
-  );
+  const [leftTabs, setLeftTabs] = useState(_leftTabs);
+
+  useEffect(() => {
+    const getFilm = async () => {
+      if (!router.query?.slug) return;
+      const {
+        slug: [imdbId, cityId],
+      } = router.query;
+      const film = await getMovieById(imdbId, cityId);
+      console.log('film', film);
+      setFilm(film);
+      setLeftTabs((prev) =>
+        prev.map((e) => {
+          if (e.id === 2) e.displayActive = !!film?.showTime?.vermouth;
+          if (e.id === 3) e.displayActive = !!film?.cast;
+          return { ...e };
+        })
+      );
+    };
+
+    getFilm();
+  }, [router.query]);
+
 
   const updateTabs = (tabId) => () => {
     setLeftTabs((pTabs) =>
@@ -80,24 +102,27 @@ const FilmDetail = ({ film }) => {
 
           <div className='flex flex-row pl-6 pb-36'>
             <ul className='flex flex-col items-start text-lg'>
-              {_leftTabs.map((t) => (
-                <li
-                  key={`tab-${t.id}`}
-                  className={`text-rotate-90-rl mb-10 ${
-                    t.active ? 'font-bold' : 'text-gray-400'
-                  }`}
-                  onClick={updateTabs(t.id)}
-                >
-                  {t.name}
-                </li>
-              ))}
+              {leftTabs.map(
+                (t) =>
+                  t.displayActive && (
+                    <li
+                      key={`tab-${t.id}`}
+                      className={`text-rotate-90-rl mb-10 ${
+                        t.active ? 'font-bold' : 'text-gray-400'
+                      }`}
+                      onClick={updateTabs(t.id)}
+                    >
+                      {t.name}
+                    </li>
+                  )
+              )}
             </ul>
             <div className='mt-5 ml-12 mr-8 w-full'>
-              {_leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
-              {_leftTabs.find((t) => t.active).id == 2 && (
+              {leftTabs.find((t) => t.active).id == 1 && <Info film={film} />}
+              {leftTabs.find((t) => t.active).id == 2 && (
                 <Horarios film={film} />
               )}
-              {_leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
+              {leftTabs.find((t) => t.active).id == 3 && <Cast film={film} />}
             </div>
           </div>
           <div className='pt-5 bg-gradient-to-r from-gray-200 to-gray-100 rounded-tl-4xl fixed bottom-0 w-full'>
@@ -126,43 +151,13 @@ const FilmDetail = ({ film }) => {
           </div>
         </>
       ) : (
-        <div>Theres no movie info</div>
+        <SpinnerLoader />
       )}
     </Layout>
   );
 };
 
 export default FilmDetail;
-
-export async function getStaticPaths() {
-  const cities = await getCities();
-  const citiesMovies = await Promise.all(
-    cities.map(async (c) => ({ ...c, movies: await getMovies(c.url) }))
-  );
-  let respArray = [];
-  citiesMovies.forEach((cm) => {
-    cm.movies.flat().forEach((m) => {
-      respArray.push({ params: { slug: [m.imdbId + '', cm.id + ''] } });
-    });
-  });
-
-  console.log(respArray)
-  return {
-    paths: respArray,
-    fallback: false,
-  };
-}
-
-export async function getStaticProps({ params }) {
-  const [imdbId, cityId] = params.slug;
-  const film = await getMovieById(imdbId, cityId);
-  console.log(film);
-  return {
-    props: {
-      film,
-    },
-  };
-}
 
 export const Info = ({ film }) => {
   const sortedBackdrops = film.images?.backdrops.slice(0, 5);
