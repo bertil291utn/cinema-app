@@ -37,7 +37,6 @@ const FilmDetail = () => {
         slug: [imdbId, cityId],
       } = router.query;
       const film = await getMovieById(imdbId, cityId);
-      console.log('film', film);
       setFilm(film);
       setLeftTabs((prev) =>
         prev.map((e) => {
