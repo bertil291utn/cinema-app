@@ -3,6 +3,8 @@ import {
   IoFastFoodSharp,
   IoHomeSharp,
   IoHomeOutline,
+  IoInformationCircleOutline,
+  IoInformationCircleSharp,
 } from 'react-icons/io5';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -39,27 +41,16 @@ export default function Tab() {
         scrollUp ? 'block' : 'hidden'
       }`}
     >
-      <div className='grid grid-cols-4 '>
+      <div className='flex mx-auto w-1/2 space-x-5'>
         {_tabs.map((icon, i) => {
-          const {
-            iconComp: { inactive: IconCompIn, active: IconCompAc },
-          } = icon;
-          return (
+          return icon.href.includes('http') ? (
+            <a href={icon.href} target='_blank' rel='noReferrer'>
+              <IconTab icon={icon} selectedTab={selectedTab} />
+            </a>
+          ) : (
             <Link href={icon.href} key={`tab-${i}`}>
               <a>
-                <div
-                  className='p-2 flex flex-col items-center justify-end'
-                  onClick={selectedTab(icon.id)}
-                >
-                  {icon.active ? (
-                    <IconCompAc className='text-3xl' />
-                  ) : (
-                    <IconCompIn className='text-3xl' />
-                  )}
-                  <span className={`block ${icon.active ? 'font-bold' : ''}`}>
-                    {icon.name}
-                  </span>
-                </div>
+                <IconTab icon={icon} selectedTab={selectedTab} />
               </a>
             </Link>
           );
@@ -86,16 +77,33 @@ export const menuIcons = [
   },
   {
     id: 3,
-    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-    name: 'Snacks',
+    iconComp: {
+      inactive: IoInformationCircleOutline,
+      active: IoInformationCircleSharp,
+    },
+    name: 'Info',
     active: false,
-    href: '/',
-  },
-  {
-    id: 4,
-    iconComp: { inactive: IoFastFoodOutline, active: IoFastFoodSharp },
-    name: 'Snacks',
-    active: false,
-    href: '/',
+    href: 'https://www.cineplex.com.ec/home/',
   },
 ];
+
+const IconTab = ({ icon, selectedTab }) => {
+  const {
+    iconComp: { inactive: IconCompIn, active: IconCompAc },
+  } = icon;
+  return (
+    <div
+      className='p-2 flex flex-col items-center justify-end'
+      onClick={selectedTab(icon.id)}
+    >
+      {icon.active ? (
+        <IconCompAc className='text-3xl' />
+      ) : (
+        <IconCompIn className='text-3xl' />
+      )}
+      <span className={`block ${icon.active ? 'font-bold' : ''}`}>
+        {icon.name}
+      </span>
+    </div>
+  );
+};
