@@ -37,6 +37,8 @@ const FilmDetail = () => {
         slug: [imdbId, cityId],
       } = router.query;
       const film = await getMovieById(imdbId, cityId);
+      const cities = await getCities();
+      film.cityName = cities.find((c) => c.id == cityId).name || '';
       setFilm(film);
       setLeftTabs((prev) =>
         prev.map((e) => {
@@ -49,7 +51,6 @@ const FilmDetail = () => {
 
     getFilm();
   }, [router.query]);
-
 
   const updateTabs = (tabId) => () => {
     setLeftTabs((pTabs) =>
@@ -139,6 +140,7 @@ const FilmDetail = () => {
               <p className='text-2xl font-bold'>
                 {`$${film.showTime.regular.price}`}
               </p>
+              <p>{film.cityName}</p>
               <button
                 onClick={() => window.open(`tel:${film.showTime.telephone}`)}
                 className='bg-blue-600 rounded-tl-4xl w-1/2 font-bold py-7 text-white text-center text-2xl'
@@ -248,6 +250,7 @@ export const Horarios = ({ film }) => {
       </div>
       <p className='text-gray-400'>{film.showTime.vermouth.days.join(' / ')}</p>
       <p className='text-2xl font-bold'>{`$${film.showTime.vermouth.price}`}</p>
+      <p>{film.cityName}</p>
     </>
   );
 };

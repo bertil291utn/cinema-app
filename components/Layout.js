@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 const Tab = dynamic(() => import('../components/tab'));
 const Navbar = dynamic(() => import('../components/navbar'));
 
-const Layout = ({ subDir,children }) => {
+const Layout = ({ subDir = false, children }) => {
   return (
     <>
       {!subDir && <Navbar />}

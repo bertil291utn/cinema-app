@@ -5,14 +5,11 @@ import {
   IoHomeOutline,
 } from 'react-icons/io5';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
-// import { refreshData } from '../utils/refresh';
 
 export default function Tab() {
   const [_tabs, setTab] = useState(menuIcons);
   const [scrollUp, setScrollUp] = useState(false);
-  // const router = useRouter();
 
   useEffect(() => {
     let prevScrollpos = window.pageYOffset;
@@ -20,6 +17,9 @@ export default function Tab() {
       const currentScrollPos = window.pageYOffset;
       setScrollUp(prevScrollpos > currentScrollPos);
       prevScrollpos = currentScrollPos;
+    };
+    return () => {
+      setTab(undefined);
     };
   }, []);
 
@@ -31,7 +31,6 @@ export default function Tab() {
         return t;
       })
     );
-    // refreshData(router);
   };
 
   return (
