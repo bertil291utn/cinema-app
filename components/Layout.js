@@ -9,7 +9,7 @@ const Layout = ({ subDir = false, children }) => {
     <>
       {!subDir && <Navbar />}
       {children}
-      {!subDir && <Tab />}
+      {/* {!subDir && <Tab />} */}
       {!subDir && <Footer />}
     </>
   );
