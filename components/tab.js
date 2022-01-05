@@ -44,7 +44,7 @@ export default function Tab() {
       <div className='flex mx-auto w-1/2 space-x-5'>
         {_tabs.map((icon, i) => {
           return icon.href.includes('http') ? (
-            <a href={icon.href} target='_blank' rel='noReferrer'>
+            <a href={icon.href} target='_blank' rel='noReferrer' key={`tab-${i}`}>
               <IconTab icon={icon} selectedTab={selectedTab} />
             </a>
           ) : (
