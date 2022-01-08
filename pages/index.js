@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import ChipButton from '../components/ChipButton';
 import axios from 'axios';
-const cheerio = require('cheerio');
+const cheerio = require('cheerio'); 
 
 export default function Home({ cityMovies, cities }) {
   const [cityMovie, setCityMovie] = useState(cityMovies[0]);
