@@ -299,11 +299,7 @@ async function getMovies(cityURL) {
         .replace(/[\u0300-\u036f]/g, '');
 
       let searchedMovie = await axios.get(
-        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${
-          process.env.NEXT_PUBLIC_TMBD_API_KEY
-        }&language=es-ES&query=${
-          movieName.split(' ')[0]
-        }&page=1&include_adult=false&year=2021`
+        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
       let imdbId = movieName.replace(/\s/g, '-');
@@ -387,6 +383,7 @@ async function getMovieById(imdbId, cityId) {
     description = description.text();
     let trailer = $1('iframe');
     trailer = trailer.attr('src');
+    const trailerKey = trailer.split('/');
 
     const info = {
       release_dates: {
@@ -413,7 +410,7 @@ async function getMovieById(imdbId, cityId) {
       videos: {
         results: [
           {
-            key: trailer,
+            key: trailerKey[trailerKey.length - 1],
             type: 'Trailer',
           },
         ],
@@ -447,6 +444,7 @@ async function getMovieById(imdbId, cityId) {
       language: $(movieFinded.h5Spans.get(1)).text().trim() || 'Espanol',
       ...info,
       original_title: movieFinded.movieName,
+      title: movieFinded.movieName,
     };
   }
   const cities = await getCities();

@@ -95,11 +95,7 @@ async function getMovies(cityURL) {
       const img = $(section).find('img').attr('src');
 
       let searchedMovie = await axios.get(
-        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${
-          process.env.NEXT_PUBLIC_TMBD_API_KEY
-        }&language=es-ES&query=${
-          movieName.split(' ')[0]
-        }&page=1&include_adult=false&year=2021`
+        `${process.env.NEXT_PUBLIC_TMBD_URL}/search/movie?api_key=${process.env.NEXT_PUBLIC_TMBD_API_KEY}&language=es-ES&query=${movieName}&page=1&include_adult=false&year=2021`
       );
       searchedMovie = searchedMovie.data;
       let imdbId = movieName.replace(/\s/g, '-');
